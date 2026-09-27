@@ -14,7 +14,7 @@ tehnika: akril na platnu
 dimenzije:
   visina_cm: 60
   sirina_cm: 45
-status: dostupno
+status: prodano
 godina_priblizna: false
 podloga: platno
 uokvireno: false
@@ -26,6 +26,7 @@ oznake: []
 cijena: 120
 valuta: EUR
 cijena_na_upit: false
+datum_prodaje: '2026-09-28'
 istaknuto: false
 redoslijed: 0
 datum_objave: '2026-09-27'
