@@ -1,6 +1,6 @@
 ---
 id: r-2026-003
-stanje_objave: skica
+stanje_objave: objavljeno
 naslov_hr: Slika kojom testiram
 slug: slika-kojom-testiram
 slike:
@@ -33,4 +33,4 @@ datum_izmjene: '2026-09-27'
 povezani_radovi: []
 ---
 
-Dada
+Značenje i definicijaJezično značenje: Organizirana jedinica riječi viša od rečenice povezana smislom.Porijeklo riječi: Dolazi od latinske riječi textum, što znači tkanje ili tkivo.Širi smisao: Obuhvaća i filmska djela, kazališne predstave, glazbene stihove ili vizualne znakove koji se mogu "čitati".Korisne povezniceAko tražite glazbene stihove, posjetite Tekstovi.net za najveću regionalnu galeriju pjesama.Ako trebate pretvoriti dokumente u govor, isprobajte Speechify.Ako želite, recite mi:Tražite li značenje riječi u nekom specifičnom kontekstu?Trebate li pomoć s pisanjem ili lekturom teksta?
