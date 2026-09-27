@@ -26,11 +26,11 @@
   {
     "slug": "gospa-zalosna",
     "id": "r-2026-005",
-    "stanje": "aktivan",
+    "stanje": "povucen",
     "od": "2026-09-12"
   },
   {
-    "slug": "test-proba",
+    "slug": "slika-kojom-testiram",
     "id": "r-2026-003",
     "stanje": "aktivan",
     "od": "2026-09-27"
