@@ -1,0 +1,54 @@
+---
+/**
+ * Jedina točka kroz koju prolazi svaka fotografija djela.
+ *
+ * Zašto ne <Image> izravno na svakom mjestu: od Astra v6 zadavanje i `width`
+ * i `height` REŽE sliku umjesto da je deformira. Na stranici sa slikama to
+ * znači odrezane glave na uspravnim ikonama. Ovdje se zadaje samo `widths`
+ * + `sizes`, a omjer drži CSS s object-fit: contain.
+ *
+ * Također: v6+ više NIKAD ne povećava sliku. Fotografija od 800px se tiho
+ * prikaže kao 800px — zato Atelier tvrdo upozorava ispod 1400px.
+ */
+import { Picture } from 'astro:assets';
+
+interface Props {
+  izvor: ImageMetadata;
+  alt: string;
+  /** Jedna slika po stranici smije biti `prioritet` — ona je LCP. */
+  prioritet?: boolean;
+  sizes?: string;
+  sirine?: number[];
+  klasa?: string;
+}
+
+const {
+  izvor,
+  alt,
+  prioritet = false,
+  sizes = '(min-width: 64rem) 46rem, (min-width: 40rem) 90vw, 100vw',
+  sirine,
+  klasa,
+} = Astro.props;
+
+// Nikad ne traži veće od izvornika — v6+ ionako ne povećava, a suvišne
+// varijante samo produljuju build.
+const ZELJENE = sirine ?? [400, 800, 1200, 1600, 2000];
+const dostupne = ZELJENE.filter((w) => w <= izvor.width);
+const konacne = dostupne.length ? dostupne : [izvor.width];
+---
+
+<Picture
+  src={izvor}
+  alt={alt}
+  widths={konacne}
+  sizes={sizes}
+  formats={['avif', 'webp']}
+  fallbackFormat="jpeg"
+  quality={82}
+  fit="contain"
+  class={klasa}
+  loading={prioritet ? 'eager' : 'lazy'}
+  decoding={prioritet ? 'sync' : 'async'}
+  fetchpriority={prioritet ? 'high' : 'auto'}
+/>

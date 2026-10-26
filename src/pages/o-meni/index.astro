@@ -1,0 +1,101 @@
+---
+/**
+ * O meni.
+ *
+ * Tekst je NJEZIN, iz upitnika, gotovo doslovno — samo posložen u odlomke i
+ * s minimalnim vezivnim rečenicama. Namjerno nije „uljepšan": ljudi prepoznaju
+ * kad je tekst o vjeri pisan iz marketinga, a ne iz iskustva.
+ *
+ * Nema titule, nema akademije, nema izložbi — potvrdila je da ih nema
+ * (pitanje 13), pa taj odjeljak ne postoji umjesto da bude prazan.
+ */
+import Osnovni from '../../layouts/Osnovni.astro';
+import Mrvice from '../../components/Mrvice.astro';
+import { site } from '../../site.config.mjs';
+import { jsonLdMrvice } from '../../core/rad.mjs';
+
+const mrvice = [
+  { naziv: 'Početna', putanja: '/' },
+  { naziv: 'O meni', putanja: '/o-meni/' },
+];
+---
+
+<Osnovni
+  naslov={`O meni — ${site.naziv}, slikarica sakralnih motiva`}
+  opis="Nikolina Tomić, slikarica iz Zagreba. Sakralni motivi u akrilu na platnu — kako je počelo i što joj vjera znači u odnosu na slikanje."
+  jezik="hr"
+  prijevodi={{ hr: '/o-meni/', en: '/en/about/' }}
+  jsonLd={[jsonLdMrvice(mrvice)]}
+>
+  <Mrvice stavke={mrvice} />
+
+  <div class="omot omot--usko">
+    <p class="nadnaslov">O autorici</p>
+    <h1>Nikolina Tomić</h1>
+
+    <p class="uvod">
+      Slikam još od malih nogu, a prodajom slika bavim se posljednjih pet
+      godina. Radim u Zagrebu.
+    </p>
+
+    <p>
+      Sve je krenulo kada mi je mama kupila platno i poželjela da joj naslikam
+      Milosrdnog Isusa. Tada sam se prvi put ozbiljnije upustila u slikanje — i
+      tu je zapravo sve počelo.
+    </p>
+
+    <p>
+      Sakralni motivi su mi najbliži jer mi vjera daje smisao u životu i upravo
+      takvim se motivima najviše radujem. Vjera i slikanje su kod mene jako
+      povezani: kroz slike mogu s ljudima podijeliti svoje iskustvo vjere i mali
+      dio onoga kako je ja doživljavam.
+    </p>
+
+    <p>
+      Dok slikam sliku nekog svetca, osjećam prvenstveno radost i zahvalnost na
+      darovanom talentu. Posebno mi je lijepo kada znam da će ta slika nekome
+      značiti nešto više.
+    </p>
+
+    <blockquote class="zelja">
+      <p>
+        Moja velika želja za budućnost je naslikati jednu posebnu sliku
+        Milosrdnog Isusa.
+      </p>
+    </blockquote>
+
+    <hr class="crta-zlatna" />
+
+    <h2>Kako radim</h2>
+    <p>
+      Radim akrilom na platnu, najčešće u impasto tehnici — boja se nanosi
+      gusto, u debelim slojevima, pa se potezi kista vide i opipaju. Slika time
+      dobiva reljef i mijenja se ovisno o tome kako na nju pada svjetlo.
+    </p>
+    <p>
+      Slike nastaju jedna po jedna, najčešće po narudžbi. Izrada traje od
+      tjedan dana do nekoliko mjeseci, ovisno o veličini i motivu.
+    </p>
+
+    <p class="akcije">
+      <a class="gumb gumb--glavni" href="/narudzbe/">Naruči sliku</a>
+      <a class="gumb gumb--obrub" href="/radovi/">Pogledaj radove</a>
+    </p>
+  </div>
+</Osnovni>
+
+<style>
+  .uvod { font-size: var(--step-1); color: var(--color-text-2); }
+  h2 { margin-top: 2.5rem; }
+  .zelja {
+    margin: 2rem 0;
+    padding: 0.25rem 0 0.25rem 1.25rem;
+    border-left: 2px solid var(--color-gold-rule);
+    font-family: var(--font-display);
+    font-size: var(--step-1);
+    font-style: italic;
+    color: var(--color-text);
+  }
+  .zelja p { margin: 0; }
+  .akcije { display: flex; gap: 0.9rem; flex-wrap: wrap; margin-top: 2rem; }
+</style>

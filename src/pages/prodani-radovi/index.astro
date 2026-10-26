@@ -1,0 +1,54 @@
+---
+/**
+ * Prodani radovi ostaju na stranici i u indeksu.
+ *
+ * Razlog nije sentimentalan: prodani radovi su dokaz da se radovi stvarno
+ * prodaju, nose povijest cijena i formata, a njihovi URL-ovi s vremenom
+ * skupe najviše poveznica. Skrivanje prodanog rada je brisanje dokaza.
+ */
+import { getCollection } from 'astro:content';
+import Osnovni from '../../layouts/Osnovni.astro';
+import KarticaRada from '../../components/KarticaRada.astro';
+import Mrvice from '../../components/Mrvice.astro';
+import { sortiraj, jeObjavljen, jeProdan, jsonLdMrvice } from '../../core/rad.mjs';
+
+const prodani = sortiraj((await getCollection('radovi')).filter(jeObjavljen).filter(jeProdan));
+
+const mrvice = [
+  { naziv: 'Početna', putanja: '/' },
+  { naziv: 'Prodani radovi', putanja: '/prodani-radovi/' },
+];
+---
+
+<Osnovni
+  naslov="Prodani radovi — u privatnim zbirkama"
+  opis="Radovi koji su pronašli svoj dom. Pregled ranijih slika i ikona s podacima o tehnici, dimenzijama i godini nastanka."
+  jezik="hr"
+  jsonLd={[jsonLdMrvice(mrvice)]}
+>
+  <Mrvice stavke={mrvice} />
+
+  <div class="omot">
+    <p class="nadnaslov">Arhiva</p>
+    <h1>Prodani radovi</h1>
+    <p class="uvod">
+      Ovi radovi više nisu dostupni — u privatnim su zbirkama. Ostaju ovdje jer
+      pokazuju raspon rada i jer se sličan rad gotovo uvijek može naslikati po
+      narudžbi. Ako vam se neki od njih svidio, <a href="/narudzbe/">javite se</a>:
+      nikad nije ista slika dvaput, ali motiv, format i ugođaj mogu biti bliski.
+    </p>
+    <hr class="crta-zlatna" />
+
+    {prodani.length === 0 ? (
+      <div class="prazno"><p>Još nema prodanih radova u arhivi.</p></div>
+    ) : (
+      <ul class="mreza">
+        {prodani.map((r, i) => <KarticaRada rad={r} jezik="hr" prioritet={i < 2} />)}
+      </ul>
+    )}
+  </div>
+</Osnovni>
+
+<style>
+  .uvod { max-width: var(--mjera); color: var(--color-text-2); }
+</style>

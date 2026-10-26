@@ -1,0 +1,97 @@
+---
+/**
+ * About — English.
+ *
+ * The artist's statement is translated from her own Croatian words, kept
+ * close to the original rather than polished into marketing copy. Her wish
+ * for the future is hers, not an invention.
+ *
+ * No qualifications, no exhibitions, no awards — she confirmed she has none,
+ * so that section simply does not exist rather than sitting empty.
+ */
+import Osnovni from '../../../layouts/Osnovni.astro';
+import Mrvice from '../../../components/Mrvice.astro';
+import { site } from '../../../site.config.mjs';
+import { jsonLdMrvice } from '../../../core/rad.mjs';
+
+const mrvice = [
+  { naziv: 'Home', putanja: '/en/' },
+  { naziv: 'About', putanja: '/en/about/' },
+];
+---
+
+<Osnovni
+  naslov={`About — ${site.naziv}, sacred art painter`}
+  opis="Nikolina Tomić, a painter based in Zagreb, Croatia. Sacred subjects in acrylic on canvas — how it started and what faith has to do with her painting."
+  jezik="en"
+  prijevodi={{ hr: '/o-meni/', en: '/en/about/' }}
+  jsonLd={[jsonLdMrvice(mrvice)]}
+>
+  <Mrvice stavke={mrvice} jezik="en" />
+
+  <div class="omot omot--usko">
+    <p class="nadnaslov">About</p>
+    <h1>Nikolina Tomić</h1>
+
+    <p class="uvod">
+      I have painted since I was a child, and have been selling my work for the
+      past five years. I work in Zagreb, Croatia.
+    </p>
+
+    <p>
+      It began when my mother bought me a canvas and asked me to paint the
+      Divine Mercy for her. That was the first time I took painting seriously —
+      and that is where everything started.
+    </p>
+
+    <p>
+      Sacred subjects are closest to me because my faith gives my life meaning,
+      and those are the subjects I most look forward to painting. Faith and
+      painting are closely bound together for me: through paintings I can share
+      my own experience of faith, and a small part of how I live it.
+    </p>
+
+    <p>
+      While painting a saint, what I feel above all is joy and gratitude for the
+      talent I was given. It means a great deal to me when I know a painting
+      will mean something more to the person receiving it.
+    </p>
+
+    <blockquote class="zelja">
+      <p>My great wish is to one day paint a particular painting of the Divine Mercy.</p>
+    </blockquote>
+
+    <hr class="crta-zlatna" />
+
+    <h2>How I work</h2>
+    <p>
+      I work in acrylic on canvas, most often using impasto — the paint is laid
+      on thickly, in heavy layers, so the brushstrokes stay visible and can be
+      felt. The surface has real relief and changes with the light falling on it.
+    </p>
+    <p>
+      Paintings are made one at a time, usually to commission. A work takes
+      anywhere from a week to a few months, depending on size and subject.
+    </p>
+
+    <p class="akcije">
+      <a class="gumb gumb--glavni" href="/en/commissions/">Commission a painting</a>
+      <a class="gumb gumb--obrub" href="/radovi/">See the works</a>
+    </p>
+  </div>
+</Osnovni>
+
+<style>
+  .uvod { font-size: var(--step-1); color: var(--color-text-2); }
+  h2 { margin-top: 2.5rem; }
+  .zelja {
+    margin: 2rem 0;
+    padding: 0.25rem 0 0.25rem 1.25rem;
+    border-left: 2px solid var(--color-gold-rule);
+    font-family: var(--font-display);
+    font-size: var(--step-1);
+    font-style: italic;
+  }
+  .zelja p { margin: 0; }
+  .akcije { display: flex; gap: 0.9rem; flex-wrap: wrap; margin-top: 2rem; }
+</style>

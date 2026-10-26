@@ -1,0 +1,94 @@
+---
+/**
+ * Arhiva, stranice 2+. Stranica 1 je /radovi/ i ovdje se namjerno ne generira.
+ * Svaka stranica je kanonska sama na sebi (ne kanonizira se na stranicu 1) —
+ * inače Google nikad ne popiše djela s dubljih stranica.
+ */
+import { getCollection } from 'astro:content';
+import Osnovni from '../../../layouts/Osnovni.astro';
+import KarticaRada from '../../../components/KarticaRada.astro';
+import Mrvice from '../../../components/Mrvice.astro';
+import { apsolutno } from '../../../site.config.mjs';
+import { sortiraj, jeObjavljen, jsonLdMrvice, putanjaRada, naslovRada } from '../../../core/rad.mjs';
+import { PO_STRANICI } from '../index.astro';
+
+export async function getStaticPaths() {
+  const svi = (await getCollection('radovi')).filter(jeObjavljen);
+  const ukupno = Math.ceil(svi.length / PO_STRANICI);
+  const putanje = [];
+  for (let n = 2; n <= ukupno; n++) {
+    putanje.push({ params: { stranica: String(n) }, props: { broj: n, ukupno } });
+  }
+  return putanje;
+}
+
+const { broj, ukupno } = Astro.props;
+
+const svi = sortiraj((await getCollection('radovi')).filter(jeObjavljen));
+const naStranici = svi.slice((broj - 1) * PO_STRANICI, broj * PO_STRANICI);
+
+const mrvice = [
+  { naziv: 'Početna', putanja: '/' },
+  { naziv: 'Svi radovi', putanja: '/radovi/' },
+  { naziv: `Stranica ${broj}`, putanja: `/radovi/stranica/${broj}/` },
+];
+
+const prethodna = broj === 2 ? '/radovi/' : `/radovi/stranica/${broj - 1}/`;
+const sljedeca = broj < ukupno ? `/radovi/stranica/${broj + 1}/` : null;
+
+const jsonLd = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'CollectionPage',
+    name: `Svi radovi — stranica ${broj}`,
+    url: apsolutno(`/radovi/stranica/${broj}/`),
+    mainEntity: {
+      '@type': 'ItemList',
+      numberOfItems: svi.length,
+      // Brojač se nastavlja kroz stranice, ne kreće ispočetka.
+      itemListElement: naStranici.map((r, i) => ({
+        '@type': 'ListItem',
+        position: (broj - 1) * PO_STRANICI + i + 1,
+        url: apsolutno(putanjaRada(r, 'hr')),
+        name: naslovRada(r, 'hr'),
+      })),
+    },
+  },
+  jsonLdMrvice(mrvice),
+];
+---
+
+<Osnovni
+  naslov={`Svi radovi — stranica ${broj} | Sakralno slikarstvo`}
+  opis={`Nastavak arhive radova. Stranica ${broj} od ${ukupno} pregleda svih slika i ikona.`}
+  jezik="hr"
+  jsonLd={jsonLd}
+>
+  <Mrvice stavke={mrvice} />
+
+  <div class="omot">
+    <h1>Svi radovi — stranica {broj}</h1>
+    <hr class="crta-zlatna" />
+
+    <ul class="mreza">
+      {naStranici.map((r, i) => (
+        <KarticaRada rad={r} jezik="hr" prioritet={i < 2} prikaziCijenu />
+      ))}
+    </ul>
+
+    <nav class="paginacija" aria-label="Stranice">
+      <a href={prethodna} rel="prev">← Prethodna</a>
+      <span>Stranica {broj} od {ukupno}</span>
+      {sljedeca ? <a href={sljedeca} rel="next">Sljedeća →</a> : <span></span>}
+    </nav>
+  </div>
+</Osnovni>
+
+<style>
+  .paginacija {
+    display: flex; justify-content: space-between; align-items: center;
+    gap: 1rem; margin: 3rem 0; padding-top: 1.25rem;
+    border-top: 1px solid var(--color-border-hairline);
+    font-size: var(--step--1); color: var(--color-muted);
+  }
+</style>

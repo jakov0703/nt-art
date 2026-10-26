@@ -1,0 +1,161 @@
+/* ============================================================
+   SAKRALNA PALETA — dizajn tokeni
+   ------------------------------------------------------------
+   Boje su izvedene iz liturgijskog kolorita (ljubičasta pokore,
+   marijansko plavo, bizantski zlatni list, pergament, oxblood
+   mučenika), a zatim NEOVISNO PRERAČUNATE WCAG auditom koji je
+   oborio pet tokena. Ispravljene vrijednosti nose [AUDIT].
+
+   Ne uređuj hex vrijednosti ručno. `npm run provjeri-kontrast`
+   preračunava svaki par iz ove datoteke i pada ako neki padne.
+   ============================================================ */
+
+:root {
+  /* --- pergamentna ljestvica (topla, H36–H42; nikad hladno sivo) --- */
+  --parchment-50:  #FCF9F2;
+  --parchment-100: #F6EFE1;
+  --parchment-200: #EDE2CD;
+  --parchment-300: #DDCFB4;
+  --parchment-400: #C0AC8B; /* SAMO ISPUNE — 1.93:1 na podlozi. Nikad obrub, nikad tekst. */
+  --parchment-600: #756954;
+  --parchment-800: #2E281F;
+  --parchment-950: #14120E;
+
+  /* --- plohe --- */
+  --color-bg:           #F6EFE1;
+  --color-surface:      #FCF9F2;
+  --color-surface-sunk: #EDE2CD;
+
+  /* --- TAMNA PLOHA ---------------------------------------------
+     Bez nje je cijela stranica jedan ton pergamenta i sve izgleda
+     ravno. Tamna ploha daje dubinu, nosi hero i istaknute dijelove,
+     i JEDINO na njoj zlato izgleda kao zlato: #D9B569 na tinti daje
+     9.23:1, dok isto zlato na pergamentu jedva prijeđe 3.7:1.
+     ------------------------------------------------------------- */
+  --color-ink:          #1A1611;  /* najtamnija — hero */
+  --color-ink-2:        #241F17;  /* nešto svjetlija — kartice na tamnom */
+  --color-on-ink:       #F4EBD9;  /* tekst na tinti, 15.20:1 */
+  --color-on-ink-muted: #BFAE8E;  /* prigušeni tekst na tinti */
+  --color-gold-on-ink:  #D9B569;  /* zlato koje na tinti stvarno svijetli */
+
+  /* --- obrubi --- */
+  --color-border-hairline: #DDCFB4; /* UKRASNO (1.34:1) — nikad jedina granica kontrole */
+  --color-border:          #8B7752; /* [AUDIT] bio #9C8560 = 2.76:1 na uvučenoj plohi, pad 1.4.11 */
+
+  /* --- tekst --- */
+  --color-text:       #241F17; /* 14.30:1 */
+  --color-text-2:     #5A5040; /* 6.91:1  */
+  --color-muted:      #665A45; /* 5.90:1  */
+
+  /* --- zlato --- */
+  --color-gold:       #745C13; /* [AUDIT] bio #7E6415 = 4.40:1 na uvučenoj plohi, pad za tekst */
+  --color-gold-hover: #5F4B0F; /* 7.34:1 */
+  --color-gold-rule:  #96761C; /* [AUDIT] bio #9E7D1E = 3.026:1, nema margine na 1px liniji */
+  --color-gold-leaf:  #C9A227; /* 2.11:1 — ZABRANJENO u svijetlom modu kao tekst, ikona ili granica */
+
+  /* --- marijansko plavo: poveznice, primarni gumb, fokus --- */
+  --color-link:       #2A4A93; /* 7.34:1 */
+  --color-link-hover: #1E3873;
+  --color-on-marian:  #FCF9F2;
+
+  /* --- liturgijske boje: nose značenje, nisu ukras --- */
+  --color-violet:  #5C3576; /* korizma i došašće */
+  --color-oxblood: #8E2F2F; /* mučenici; greške */
+  --color-rose:    #924459; /* [AUDIT] bio #9B4C62 = 4.54:1 na uvučenoj plohi, margina 0.04. Gaudete/Laetare; oznaka „novo" */
+
+  /* --- oznake statusa --- */
+  --color-success:        #245C36;
+  --color-success-bg:     #E4EBDD;
+  --color-success-border: #2F6B43; /* [AUDIT] bio #4E7A57 — razlika od „prodano" samo 1.40:1 */
+  --color-muted-bg:       #EDE2CD;
+  --color-muted-border:   #8B7752; /* [AUDIT] prati --color-border */
+
+  /* --- fokus --- */
+  --color-focus:        #2A4A93;
+  --color-focus-offset: #FCF9F2;
+
+  /* Glavni gumb je TINTA, ne zlato. Zlatna ispuna s bijelim natpisom
+     izgledala je maslinasto i blatno; tamni gumb je mirniji, a zlato
+     onda može ostati rezervirano za tanke linije i naglaske. */
+  --color-btn-fill: #2E2519;  /* natpis #FCF9F2 = 14.32:1 */
+  --color-btn-ink:  #FCF9F2;
+  --color-btn-hover: #1A1611;
+  --color-selection: #F2E3B8;
+
+  /* --- tipografija --- */
+  --font-display: 'EB Garamond Variable', 'EB Garamond', Georgia, 'Times New Roman', serif;
+  --font-text: 'Alegreya Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+
+  /* modularna ljestvica 1.250, baza 16px */
+  --step--2: 0.64rem;   /* 10.24px — NE koristiti za oznaku statusa */
+  --step--1: 0.8rem;    /* 12.8px  — minimum za oznaku statusa (audit) */
+  --step-0:  1rem;
+  --step-1:  1.25rem;
+  --step-2:  1.563rem;
+  --step-3:  1.953rem;
+  --step-4:  2.441rem;
+  --step-5:  3.052rem;
+
+  --mjera: 68ch;        /* duljina retka */
+  --radius: 2px;        /* gotovo oštro — zaobljeni kutovi izgledaju softverski */
+  --prijelaz: 180ms cubic-bezier(0.2, 0, 0.2, 1);
+}
+
+[data-theme='dark'] {
+  --color-bg:             #14120E;
+  --color-surface:        #1F1B15;
+  --color-surface-sunk:   #2A241C; /* najgori slučaj: svaki tamni tekst riješen je PROTIV ove plohe */
+
+  --color-border-hairline: #332D23;
+  --color-border:          #82735A;
+
+  --color-text:   #F2E9D7; /* 15.51:1 */
+  --color-text-2: #B0A388;
+  --color-muted:  #A1947A;
+
+  --color-gold:       #D9B569;
+  --color-gold-hover: #EFD08D;
+  --color-gold-rule:  #C9A227; /* pravi ton zlatnog lista je ovdje siguran punom snagom */
+  --color-gold-leaf:  #C9A227;
+
+  --color-link:       #E2C173;
+  --color-link-hover: #EFD08D;
+  --color-on-marian:  #1A160F;
+
+  --color-violet:  #C3A4DC;
+  --color-oxblood: #DF8F88;
+  --color-rose:    #DFA3B3;
+
+  --color-success:        #7FC08E;
+  --color-success-bg:     #1E2C21;
+  --color-success-border: #5C8567; /* [AUDIT] bio #4A7256 = 2.80:1 na uzdignutoj plohi */
+  --color-muted-bg:       #2A241C;
+  --color-muted-border:   #82735A;
+
+  --color-focus:        #E8CE82;
+  --color-focus-offset: #14120E;
+
+  --color-btn-fill: #D9B569;
+  --color-btn-ink:  #1A160F;
+  --color-selection: #3A3020;
+}
+
+/* ============================================================
+   PRAVILA KOJA JE POSTAVIO AUDIT — ne zaobilazi ih
+
+   1. Dostupno/prodano NE SMIJE ovisiti o boji. Ispune se razlikuju
+      1.05:1 — to ne razlikuje ni osoba s normalnim vidom. Oznaka
+      nosi ČETIRI signala: boja + obrub + puna/prazna točkica +
+      ispisana riječ.
+   2. Natpis oznake je --step--1 (13px), nikad --step--2. Riječ je
+      jedini stvarni razlikovni signal, mora se moći pročitati.
+   3. Zelena #245C36 i oxblood #8E2F2F razlikuju se 1.02:1 i pod
+      protanopijom su ista maslinasta. Greške i potvrde UVIJEK
+      nose ikonu i tekst, nikad samo boju.
+   4. --color-gold-leaf u svijetlom modu smije biti samo ispuna
+      unutar tamne plohe. Nikad tekst, nikad obrub, nikad ikona.
+   5. --parchment-400 je zamka: jedini je srednji ton u ljestvici
+      i prvo je čega se čovjek maši za obrub. Samo ispune.
+   6. Bez #FFFFFF, bez #000000, bez hladnih sivih, bez gradijentnog
+      zlata, i nikad više od tri naglasne boje u jednom pogledu.
+   ============================================================ */

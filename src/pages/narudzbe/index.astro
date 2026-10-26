@@ -1,0 +1,168 @@
+---
+/**
+ * Narudžbe — najvažnija stranica na cijeloj stranici.
+ *
+ * Autorica ima jedan sakralni rad i taj je otišao naručitelju. Dok se ne
+ * naslika i fotografira više radova, OVO je stranica koja donosi posao.
+ *
+ * Svi uvjeti dolje su NJEZINI odgovori iz upitnika — rok, predujam, izmjene,
+ * rad po fotografiji, crkve. Ništa nije pretpostavljeno; gdje je rekla „ne",
+ * piše „ne", jer je jasno „ne" bolje od nejasnog „možda" koje troši i njezino
+ * i kupčevo vrijeme.
+ */
+import Osnovni from '../../layouts/Osnovni.astro';
+import Mrvice from '../../components/Mrvice.astro';
+import Upit from '../../components/Upit.astro';
+import { apsolutno, cjenik, narudzba, dostava } from '../../site.config.mjs';
+import { jsonLdMrvice } from '../../core/rad.mjs';
+
+const mrvice = [
+  { naziv: 'Početna', putanja: '/' },
+  { naziv: 'Narudžbe', putanja: '/narudzbe/' },
+];
+
+const PITANJA = [
+  {
+    p: 'Koliko traje izrada slike po narudžbi?',
+    o: 'Od tjedan dana do nekoliko mjeseci, ovisno o veličini i složenosti motiva. Ako sliku trebate za određeni datum — krizmu, vjenčanje, imendan — javite se nekoliko mjeseci ranije.',
+  },
+  {
+    p: 'Treba li platiti predujam (kaparu)?',
+    o: 'Ne. Plaćanje ide nakon što je slika gotova, uplatom na račun ili gotovinom pri preuzimanju.',
+  },
+  {
+    p: 'Mogu li tražiti izmjene prije nego što slika bude gotova?',
+    o: 'Možete, po dogovoru. Najbolje je da se oko motiva i kompozicije dogovorimo na početku, prije nego što počnem slikati.',
+  },
+  {
+    p: 'Slikate li prema fotografiji?',
+    o: 'Ne. Radim sakralne motive i slobodne kompozicije, ali ne izrađujem portrete ni slike prema priloženoj fotografiji.',
+  },
+  {
+    p: 'Koje motive slikate?',
+    o: 'Sakralne motive zapadne tradicije — Presveto Srce Isusovo, Milosrdnog Isusa, Gospu, svetce. Uz to slikam i cvijeće, ptice i slobodne kompozicije.',
+  },
+  {
+    p: 'Dolaze li slike uokvirene?',
+    o: 'Ne, slike se prodaju neuokvirene. Platno je napeto na drveni podokvir i može visjeti i bez okvira.',
+  },
+  {
+    p: 'Šaljete li slike poštom?',
+    o: 'Šaljem unutar Hrvatske. U Zagrebu i okolici moguće je i osobno preuzimanje po dogovoru.',
+  },
+];
+
+const jsonLd = [
+  jsonLdMrvice(mrvice),
+  {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    '@id': `${apsolutno('/narudzbe/')}#faq`,
+    mainEntity: PITANJA.map((x) => ({
+      '@type': 'Question',
+      name: x.p,
+      acceptedAnswer: { '@type': 'Answer', text: x.o },
+    })),
+  },
+];
+---
+
+<Osnovni
+  naslov="Sakralna slika po narudžbi — Zagreb"
+  opis="Ručno slikana sakralna slika po narudžbi: Presveto Srce Isusovo, Gospa, sveci. Akril na platnu, izrada od tjedan dana. Cijene od 50 €."
+  jezik="hr"
+  prijevodi={{ hr: '/narudzbe/', en: '/en/commissions/' }}
+  jsonLd={jsonLd}
+>
+  <Mrvice stavke={mrvice} />
+
+  <div class="omot omot--usko">
+    <p class="nadnaslov">Narudžbe</p>
+    <h1>Slika po narudžbi</h1>
+
+    <p class="uvod">
+      Najčešći razlog zbog kojeg mi se ljudi jave nije slika koju su negdje
+      vidjeli, nego ona koje nema: Presveto Srce Isusovo za dnevni boravak,
+      slika za molitveni kutak, dar za krizmu ili vjenčanje. Takvo se ne kupuje
+      gotovo.
+    </p>
+
+    <hr class="crta-zlatna" />
+
+    <h2>Kako to ide</h2>
+    <ol class="koraci">
+      <li>
+        <strong>Javite se.</strong> Recite koji motiv želite, za koga je slika i
+        gdje će stajati. Ako niste sigurni, opišite priliku — to je dovoljno za
+        početak razgovora.
+      </li>
+      <li>
+        <strong>Dogovor.</strong> Utvrdimo motiv, veličinu, rok i cijenu.
+      </li>
+      <li>
+        <strong>Slikanje.</strong> {narudzba.rok}. Izmjene su moguće po dogovoru.
+      </li>
+      <li>
+        <strong>Preuzimanje i plaćanje.</strong> Osobno u Zagrebu ili poštom
+        unutar Hrvatske. Plaća se tek kad je slika gotova — {dostava.placanje.join(' ili ')}.
+        Predujam ne tražim.
+      </li>
+    </ol>
+
+    <h2>Cijene</h2>
+    <p>
+      Cijena ovisi o veličini i složenosti motiva. Ovo su okvirni rasponi:
+    </p>
+    <table class="cjenik brojke">
+      <thead>
+        <tr><th scope="col">Veličina</th><th scope="col">Cijena</th></tr>
+      </thead>
+      <tbody>
+        {cjenik.map((c) => (
+          <tr>
+            <th scope="row">{c.format}</th>
+            <td>{c.od} – {c.do} €</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+    <p class="sitno">
+      Slike se prodaju neuokvirene, na platnu napetom na drveni podokvir.
+      Za veličine izvan ovih raspona javite se za dogovor.
+    </p>
+
+    <h2>Što ne radim</h2>
+    <p>
+      Da ne bismo gubili vrijeme: ne slikam portrete ni slike prema priloženoj
+      fotografiji, i zasad ne primam narudžbe za crkve, kapele i oltarne slike.
+    </p>
+
+    <h2>Česta pitanja</h2>
+    <dl class="faq">
+      {PITANJA.map((x) => (
+        <div class="faq__stavka">
+          <dt>{x.p}</dt>
+          <dd>{x.o}</dd>
+        </div>
+      ))}
+    </dl>
+
+    <Upit jezik="hr" />
+  </div>
+</Osnovni>
+
+<style>
+  .uvod { font-size: var(--step-1); color: var(--color-text-2); }
+  h2 { margin-top: 2.5rem; }
+  .koraci { padding-left: 1.2rem; }
+  .koraci li { margin-bottom: 0.9rem; max-width: var(--mjera); }
+  .cjenik { border-collapse: collapse; margin: 1rem 0; width: 100%; max-width: 26rem; }
+  .cjenik th, .cjenik td { text-align: left; padding: 0.55rem 0;
+    border-bottom: 1px solid var(--color-border-hairline); }
+  .cjenik thead th { font-size: var(--step--1); color: var(--color-muted);
+    text-transform: uppercase; letter-spacing: 0.05em; }
+  .cjenik tbody th { font-weight: 400; }
+  .faq__stavka { border-bottom: 1px solid var(--color-border-hairline); padding: 1rem 0; }
+  .faq dt { font-family: var(--font-display); font-size: var(--step-1); margin-bottom: 0.4rem; }
+  .faq dd { margin: 0; max-width: var(--mjera); color: var(--color-text-2); }
+</style>

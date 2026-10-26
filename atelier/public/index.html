@@ -1,0 +1,274 @@
+<!doctype html>
+<html lang="hr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Atelier — objava radova</title>
+  <meta name="robots" content="noindex, nofollow" />
+  <link rel="stylesheet" href="/static/app.css" />
+</head>
+<body>
+
+<section id="prijava" class="prijava omot" aria-labelledby="prijava-naslov" hidden>
+  <h1 id="prijava-naslov">Atelier</h1>
+  <p>Prijavite se za dodavanje fotografija i uređivanje radova.</p>
+  <form id="prijava-forma">
+    <label for="korisnik">Korisničko ime</label>
+    <input id="korisnik" name="username" autocomplete="username" required />
+    <label for="lozinka">Lozinka</label>
+    <input id="lozinka" name="password" type="password" autocomplete="current-password" required />
+    <p id="prijava-poruka" role="status"></p>
+    <button type="submit" class="gumb gumb--glavni">Prijavi se</button>
+  </form>
+  <p><a href="/">← Povratak na stranicu</a></p>
+</section>
+
+<header class="vrh">
+  <div class="vrh__omot">
+    <h1 class="vrh__ime">Atelier</h1>
+    <nav class="vrh__nav">
+      <button type="button" data-idi="ploca" class="gumb gumb--tih">Svi radovi</button>
+      <button type="button" data-idi="novo" class="gumb gumb--glavni">+ Novi rad</button>
+      <button type="button" id="odjava" class="gumb gumb--tih" hidden>Odjavi se</button>
+    </nav>
+  </div>
+</header>
+
+<main id="glavno" class="omot">
+  <p id="online-napomena" class="online-napomena" role="status" hidden>Promjene se trajno spremaju. Javna stranica ažurira se nakon objave koja obično traje nekoliko minuta.</p>
+
+  <!-- ============ NADZORNA PLOČA ============ -->
+  <section id="ploca" class="zaslon">
+    <p class="uvodni">
+      Ovdje su svi vaši radovi. Kliknite na rad da ga uredite, ili
+      „+ Novi rad" da dodate novi.
+    </p>
+    <div id="popis" class="popis"></div>
+  </section>
+
+  <!-- ============ OBRAZAC ============ -->
+  <section id="obrazac" class="zaslon" hidden>
+    <p class="putanja"><button type="button" data-idi="ploca" class="veza">← Natrag na sve radove</button></p>
+    <h2 id="obrazac-naslov">Novi rad</h2>
+
+    <div id="greske" class="poruke" hidden></div>
+
+    <form id="forma" autocomplete="off">
+
+      <!-- ---------- FOTOGRAFIJE ---------- -->
+      <fieldset class="blok">
+        <legend>Fotografije</legend>
+        <p class="pomoc">
+          Prva fotografija je glavna — ona se prikazuje na vrhu stranice i kad se
+          rad dijeli na društvenim mrežama. Koristite originalne fotografije s
+          fotoaparata ili telefona, ne one skinute s Instagrama (premale su).
+        </p>
+
+        <div id="zona" class="zona" tabindex="0" role="button"
+             aria-label="Povucite fotografije ovdje ili kliknite za odabir">
+          <p class="zona__tekst">
+            Povucite fotografije ovdje<br />
+            <span class="sitno">ili kliknite da ih odaberete s računala</span>
+          </p>
+          <input type="file" id="odabir" accept="image/*,.heic,.heif" multiple hidden />
+        </div>
+
+        <div id="napredak" class="napredak" hidden></div>
+        <ul id="slike" class="slike"></ul>
+      </fieldset>
+
+      <!-- ---------- OSNOVNO ---------- -->
+      <fieldset class="blok">
+        <legend>Osnovno</legend>
+
+        <div class="polje">
+          <label for="naslov_hr">Naziv djela <span class="ob">obavezno</span></label>
+          <input type="text" id="naslov_hr" name="naslov_hr" maxlength="70" required />
+          <p class="pomoc">Ime koje će posjetitelji vidjeti, npr. „Bogorodica s Djetetom".</p>
+          <p id="slug-info" class="slug-info" hidden></p>
+        </div>
+
+        <div class="polje">
+          <label for="opis_hr">Opis djela <span class="ob">obavezno</span></label>
+          <textarea id="opis_hr" name="opis_hr" rows="8"></textarea>
+          <p class="pomoc">
+            Što je prikazano, čime je slikano i zašto vam je to djelo važno.
+            Nekoliko rečenica je dovoljno — ovaj tekst posjetitelji čitaju uz
+            fotografiju i on je razlog zbog kojeg se netko javi.
+            <span id="brojac-opisa" class="brojac"></span>
+          </p>
+        </div>
+
+        <div class="red">
+          <div class="polje">
+            <label for="tehnika">Tehnika <span class="ob">obavezno</span></label>
+            <select id="tehnika" name="tehnika" required></select>
+          </div>
+          <div class="polje">
+            <label for="godina">Godina <span class="ob">obavezno</span></label>
+            <input type="text" inputmode="numeric" id="godina" name="godina" required />
+            <label class="kvadratic">
+              <input type="checkbox" id="godina_priblizna" name="godina_priblizna" />
+              <span>približno</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="polje">
+          <span class="labela">Dimenzije u centimetrima <span class="ob">obavezno</span></span>
+          <div class="red red--usko">
+            <!-- type="text" + inputmode, a NE type="number": preglednik kod
+                 number polja tiho baca sve što nije broj, pa „50x70" postane
+                 prazno polje i ona dobije „nedostaje podatak" umjesto
+                 objašnjenja da mjere idu u dva polja. Ovako vrijednost preživi
+                 i može se objasniti. inputmode i dalje otvara brojčanu
+                 tipkovnicu na mobitelu. -->
+            <div>
+              <label for="visina_cm">Visina</label>
+              <input type="text" inputmode="decimal" id="visina_cm" name="visina_cm" required />
+            </div>
+            <div class="znak">×</div>
+            <div>
+              <label for="sirina_cm">Širina</label>
+              <input type="text" inputmode="decimal" id="sirina_cm" name="sirina_cm" required />
+            </div>
+          </div>
+          <p class="pomoc">Samo brojke. „cm" ne treba pisati.</p>
+        </div>
+
+        <div class="polje">
+          <span class="labela">Stanje djela <span class="ob">obavezno</span></span>
+          <div id="statusi" class="radio-lista"></div>
+        </div>
+
+        <div class="polje" id="polje-cijena">
+          <label for="cijena">Cijena u eurima</label>
+          <input type="text" inputmode="decimal" id="cijena" name="cijena" />
+          <p class="pomoc">Samo brojke, bez znaka € i bez riječi. Umjesto „1.200 eura" upišite 1200.</p>
+          <label class="kvadratic">
+            <input type="checkbox" id="cijena_na_upit" name="cijena_na_upit" />
+            <span>Ne želim objaviti cijenu — piše „Cijena na upit"</span>
+          </label>
+        </div>
+
+        <div class="polje" id="polje-prodaja" hidden>
+          <label for="datum_prodaje">Datum prodaje</label>
+          <input type="date" id="datum_prodaje" name="datum_prodaje" />
+        </div>
+
+        <div class="polje">
+          <span class="labela">Vrsta rada</span>
+          <div class="radio-lista">
+            <label class="radio"><input type="radio" name="kategorija" value="sakralno" /> <span>Sakralni rad</span></label>
+            <label class="radio"><input type="radio" name="kategorija" value="ostalo" checked /> <span>Ostalo (portret, pejzaž, studija…)</span></label>
+          </div>
+        </div>
+
+        <div class="polje" id="polje-teme">
+          <span class="labela">Teme <span class="sitno">(do tri)</span></span>
+          <div id="teme" class="kvadratici"></div>
+          <p class="pomoc">
+            Označite teme i kad ih je malo. Tematske stranice („Slike Gospe",
+            „Slike svetaca") pojave se same čim tema skupi tri objavljena rada.
+          </p>
+        </div>
+      </fieldset>
+
+      <!-- ---------- VIŠE DETALJA ---------- -->
+      <details class="blok blok--sklopivo">
+        <summary>Više detalja <span class="sitno">— nije obavezno</span></summary>
+
+        <div class="polje">
+          <label for="podloga">Podloga</label>
+          <select id="podloga" name="podloga"><option value="">—</option></select>
+        </div>
+
+        <div class="polje">
+          <label class="kvadratic">
+            <input type="checkbox" id="uokvireno" name="uokvireno" />
+            <span>Djelo je uokvireno</span>
+          </label>
+          <input type="text" id="opis_okvira" name="opis_okvira" placeholder="Opis okvira" hidden />
+        </div>
+
+        <div class="polje">
+          <label for="ikonografska_biljeska">Ikonografska bilješka</label>
+          <textarea id="ikonografska_biljeska" name="ikonografska_biljeska" rows="4"></textarea>
+          <p class="pomoc">
+            Tko je prikazan, po čemu se prepoznaje, što znače boje ili atributi.
+            Ovo je najvrjedniji tekst na cijeloj stranici — ljudi ga traže i
+            dijele, a pretraživači ga nagrađuju.
+          </p>
+        </div>
+
+        <div class="polje">
+          <span class="labela">Namjena <span class="sitno">(za koga / za koju prigodu)</span></span>
+          <div id="namjene" class="kvadratici"></div>
+        </div>
+
+        <div class="polje">
+          <label for="ciklus">Ciklus</label>
+          <input type="text" id="ciklus" name="ciklus" list="ciklusi-popis" />
+          <datalist id="ciklusi-popis"></datalist>
+        </div>
+
+        <div class="polje">
+          <label for="zbirka_vlasnik">Vlasnik / zbirka</label>
+          <input type="text" id="zbirka_vlasnik" name="zbirka_vlasnik" placeholder="npr. Privatna zbirka, Zagreb" />
+          <p class="pomoc">Samo uz dopuštenje vlasnika. Grad bez imena je uvijek sigurna varijanta.</p>
+        </div>
+
+        <div class="polje">
+          <label class="kvadratic">
+            <input type="checkbox" id="istaknuto" name="istaknuto" />
+            <span>Istakni na naslovnici</span>
+          </label>
+        </div>
+      </details>
+
+      <!-- ---------- ENGLESKI ---------- -->
+      <details class="blok blok--sklopivo" id="blok-en">
+        <summary>
+          Engleska verzija <span class="sitno">— nije obavezno</span>
+          <span id="cip-en" class="cip">Nema engleske verzije</span>
+        </summary>
+
+        <p class="pomoc pomoc--istaknuto">
+          Vaša stranica je na hrvatskom. Engleski je dodatak za strane posjetitelje.
+          Ako ovdje ne upišete ništa, ovo djelo jednostavno neće imati englesku
+          stranicu — hrvatska radi savršeno i ništa se ne gubi.
+        </p>
+
+        <div class="polje">
+          <label for="naslov_en">Naziv na engleskom</label>
+          <input type="text" id="naslov_en" name="naslov_en" maxlength="70" />
+        </div>
+        <div class="polje">
+          <label for="opis_en">Opis na engleskom</label>
+          <textarea id="opis_en" name="opis_en" rows="6"></textarea>
+        </div>
+        <p><button type="button" id="obrisi-en" class="gumb gumb--tih">Obriši engleski</button></p>
+      </details>
+
+      <!-- ---------- SPREMANJE ---------- -->
+      <div class="podnozje-forme">
+        <div class="podnozje-forme__omot">
+          <label class="kvadratic kvadratic--veliki">
+            <input type="checkbox" id="objavi" />
+            <span><strong>Objavi na stranici</strong> — bez kvačice ostaje skica koju nitko ne vidi</span>
+          </label>
+          <div class="akcije">
+            <button type="button" id="arhiviraj" class="gumb gumb--opasno" hidden>Arhiviraj</button>
+            <button type="submit" id="spremi" class="gumb gumb--glavni">Spremi</button>
+          </div>
+        </div>
+      </div>
+    </form>
+  </section>
+</main>
+
+<div id="obavijest" class="obavijest" hidden role="status" aria-live="polite"></div>
+
+<script src="/static/app.js" type="module"></script>
+</body>
+</html>

@@ -1,0 +1,97 @@
+---
+/**
+ * Arhiva svih radova — stranica 1.
+ *
+ * Stranica 1 živi na /radovi/, NIKAD na /radovi/stranica/1 (to bi bio drugi
+ * URL s istim sadržajem). Stranice 2+ su u ./stranica/[stranica].astro.
+ * Paginacija je prava i crawlable; „učitaj još" ne smije biti jedini put.
+ */
+import { getCollection } from 'astro:content';
+import Osnovni from '../../layouts/Osnovni.astro';
+import KarticaRada from '../../components/KarticaRada.astro';
+import Mrvice from '../../components/Mrvice.astro';
+import { apsolutno } from '../../site.config.mjs';
+import { sortiraj, jeObjavljen, jsonLdMrvice, putanjaRada, naslovRada } from '../../core/rad.mjs';
+
+export const PO_STRANICI = 24;
+
+const svi = sortiraj((await getCollection('radovi')).filter(jeObjavljen));
+const ukupnoStranica = Math.max(1, Math.ceil(svi.length / PO_STRANICI));
+const naStranici = svi.slice(0, PO_STRANICI);
+
+const mrvice = [
+  { naziv: 'Početna', putanja: '/' },
+  { naziv: 'Svi radovi', putanja: '/radovi/' },
+];
+
+const jsonLd = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'CollectionPage',
+    name: 'Svi radovi',
+    url: apsolutno('/radovi/'),
+    mainEntity: {
+      '@type': 'ItemList',
+      numberOfItems: svi.length,
+      itemListElement: naStranici.map((r, i) => ({
+        '@type': 'ListItem',
+        position: i + 1,
+        url: apsolutno(putanjaRada(r, 'hr')),
+        name: naslovRada(r, 'hr'),
+      })),
+    },
+  },
+  jsonLdMrvice(mrvice),
+];
+---
+
+<Osnovni
+  naslov="Svi radovi — arhiva slika | Sakralno slikarstvo"
+  opis="Cjelovita arhiva radova: sakralne slike, ikone i raniji radovi. Pregled po godini i temi, uključujući prodane radove iz privatnih zbirki."
+  jezik="hr"
+  prijevodi={{ hr: '/radovi/', en: '/en/works/' }}
+  jsonLd={jsonLd}
+>
+  <Mrvice stavke={mrvice} />
+
+  <div class="omot">
+    <p class="nadnaslov">Arhiva</p>
+    <h1>Svi radovi</h1>
+    <p class="uvod">
+      Ovdje su svi radovi — i oni koji su još dostupni i oni koji su već otišli u
+      privatne zbirke. Prodani radovi namjerno ostaju na stranici: oni pokazuju
+      što je nastalo i kako se rad mijenjao kroz godine. Ako tražite samo ono što
+      se trenutno može kupiti, pogledajte <a href="/dostupni-radovi/">dostupne radove</a>.
+    </p>
+    <hr class="crta-zlatna" />
+
+    {svi.length === 0 ? (
+      <div class="prazno">
+        <p>Još nema objavljenih radova.</p>
+      </div>
+    ) : (
+      <ul class="mreza">
+        {naStranici.map((r, i) => (
+          <KarticaRada rad={r} jezik="hr" prioritet={i < 2} prikaziCijenu />
+        ))}
+      </ul>
+    )}
+
+    {ukupnoStranica > 1 && (
+      <nav class="paginacija" aria-label="Stranice">
+        <span>Stranica 1 od {ukupnoStranica}</span>
+        <a href="/radovi/stranica/2/" rel="next">Sljedeća stranica →</a>
+      </nav>
+    )}
+  </div>
+</Osnovni>
+
+<style>
+  .uvod { max-width: var(--mjera); color: var(--color-text-2); }
+  .paginacija {
+    display: flex; justify-content: space-between; align-items: center;
+    gap: 1rem; margin: 3rem 0; padding-top: 1.25rem;
+    border-top: 1px solid var(--color-border-hairline);
+    font-size: var(--step--1); color: var(--color-muted);
+  }
+</style>

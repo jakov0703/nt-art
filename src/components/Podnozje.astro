@@ -1,0 +1,73 @@
+---
+import { site } from '../site.config.mjs';
+
+interface Props { jezik?: 'hr' | 'en'; }
+const { jezik = 'hr' } = Astro.props;
+
+const godina = new Date().getFullYear();
+
+const T = {
+  hr: {
+    kontakt: 'Kontakt',
+    pravno: 'Pravno',
+    privatnost: 'Izjava o privatnosti',
+    kupnja: 'Kupnja i dostava',
+    pitanja: 'Česta pitanja',
+    prava: 'Sve slike i fotografije djela autorsko su vlasništvo autorice. Nije dopušteno umnožavanje bez pisanog odobrenja.',
+    nemaKontakt: 'Kontakt podaci još nisu postavljeni.',
+  },
+  en: {
+    kontakt: 'Contact',
+    pravno: 'Legal',
+    privatnost: 'Privacy',
+    kupnja: 'Buying and delivery',
+    pitanja: 'FAQ',
+    prava: 'All works and photographs are the copyright of the artist. Reproduction without written permission is not permitted.',
+    nemaKontakt: 'Contact details not yet configured.',
+  },
+}[jezik];
+---
+
+<footer class="podnozje">
+  <div class="omot podnozje__mreza">
+    <div>
+      <p class="nadnaslov">{T.kontakt}</p>
+      {site.email
+        ? <p><a href={`mailto:${site.email}`}>{site.email}</a></p>
+        : <p class="placeholder">{T.nemaKontakt}</p>}
+      {site.instagram && <p><a href={site.instagram} rel="me noopener">Instagram</a></p>}
+      {site.grad && <p>{site.grad}{site.regija ? `, ${site.regija}` : ''}</p>}
+    </div>
+
+    <div>
+      <p class="nadnaslov">{T.pravno}</p>
+      <p><a href="/kupnja-i-dostava/">{T.kupnja}</a></p>
+      <p><a href="/cesta-pitanja/">{T.pitanja}</a></p>
+      <p><a href="/privatnost/">{T.privatnost}</a></p>
+    </div>
+
+    <div>
+      <hr class="crta-zlatna" />
+      <p>© {godina} {site.naziv}</p>
+      <p>{T.prava}</p>
+    </div>
+  </div>
+</footer>
+
+<style>
+  .podnozje__mreza {
+    display: grid;
+    gap: 2rem;
+    grid-template-columns: 1fr;
+  }
+  @media (min-width: 48rem) {
+    .podnozje__mreza { grid-template-columns: repeat(3, 1fr); }
+  }
+  .podnozje p { margin: 0 0 0.35em; }
+  /* Vidljivo dok je nepopunjeno — placeholder koji se ne primijeti ode u produkciju. */
+  .placeholder {
+    color: var(--color-oxblood);
+    border-left: 2px solid var(--color-oxblood);
+    padding-left: 0.6rem;
+  }
+</style>

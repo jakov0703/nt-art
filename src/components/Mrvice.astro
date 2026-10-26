@@ -1,0 +1,20 @@
+---
+interface Props {
+  /** Zadnja stavka je trenutna stranica i NEMA link — ni u HTML-u ni u JSON-LD-u. */
+  stavke: { naziv: string; putanja: string }[];
+  jezik?: 'hr' | 'en';
+}
+const { stavke, jezik = 'hr' } = Astro.props;
+---
+
+<nav class="mrvice omot" aria-label={jezik === 'hr' ? 'Putanja' : 'Breadcrumb'}>
+  <ol>
+    {stavke.map((s, i) => (
+      <li>
+        {i < stavke.length - 1
+          ? <a href={s.putanja}>{s.naziv}</a>
+          : <span aria-current="page">{s.naziv}</span>}
+      </li>
+    ))}
+  </ol>
+</nav>

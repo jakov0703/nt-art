@@ -1,0 +1,68 @@
+---
+/**
+ * Artwork page — English.
+ *
+ * A page is generated ONLY for works that are genuinely translated (English
+ * title AND English description AND English slug). A work with no translation
+ * simply has no English page, and the Croatian page carries no dangling
+ * hreflang pointing at it.
+ *
+ * This is deliberate: a smaller, real English site beats a larger
+ * machine-translated one. Half-translated pages read as spam to both readers
+ * and search engines.
+ */
+import { getCollection } from 'astro:content';
+import { getImage } from 'astro:assets';
+
+import Osnovni from '../../../layouts/Osnovni.astro';
+import DetaljRada from '../../../components/DetaljRada.astro';
+import { site, apsolutno } from '../../../site.config.mjs';
+import {
+  jeObjavljen, imaEngleski, glavnaSlika, altTekst, naslovRada, metaOpis,
+  putanjaRada, jsonLdRada, jsonLdMrvice, mrviceRada,
+} from '../../../core/rad.mjs';
+
+export async function getStaticPaths() {
+  const svi = await getCollection('radovi');
+  return svi
+    .filter(jeObjavljen)
+    .filter(imaEngleski)
+    .map((rad) => ({ params: { slug: rad.data.slug_en }, props: { rad } }));
+}
+
+const { rad } = Astro.props;
+const glavna = glavnaSlika(rad);
+
+const ogImg = await getImage({
+  src: glavna.datoteka, width: 1200, format: 'jpeg', quality: 82, fit: 'contain',
+});
+
+const putanja = putanjaRada(rad, 'en');
+const prijevodi = { hr: putanjaRada(rad, 'hr'), en: putanja };
+
+const naslov = `${naslovRada(rad, 'en')} — ${rad.data.tehnika}, ${rad.data.godina} | ${site.naziv}`;
+const opis = metaOpis(rad, '', 'en');
+
+const jsonLd = [
+  jsonLdRada(rad, {
+    url: apsolutno(putanja),
+    slikaUrl: apsolutno(ogImg.src),
+    jezik: 'en',
+    opis,
+  }),
+  jsonLdMrvice(mrviceRada(rad, 'en')),
+];
+---
+
+<Osnovni
+  naslov={naslov.length <= 60 ? naslov : `${naslovRada(rad, 'en')} | ${site.naziv}`}
+  opis={opis}
+  jezik="en"
+  prijevodi={prijevodi}
+  ogSlika={apsolutno(`/social/${rad.data.slug}-og.jpg`)}
+  ogSlikaAlt={altTekst(rad, glavna, 'en')}
+  ogTip="article"
+  jsonLd={jsonLd}
+>
+  <DetaljRada rad={rad} jezik="en" />
+</Osnovni>

@@ -1,0 +1,82 @@
+---
+import { getCollection } from 'astro:content';
+import Osnovni from '../../../layouts/Osnovni.astro';
+import KarticaRada from '../../../components/KarticaRada.astro';
+import Mrvice from '../../../components/Mrvice.astro';
+import Upit from '../../../components/Upit.astro';
+import { apsolutno } from '../../../site.config.mjs';
+import {
+  sortiraj, jeObjavljen, jeDostupan, imaEngleski, jsonLdMrvice, putanjaRada, naslovRada,
+} from '../../../core/rad.mjs';
+
+const dostupni = sortiraj(
+  (await getCollection('radovi')).filter(jeObjavljen).filter(jeDostupan).filter(imaEngleski)
+);
+
+const mrvice = [
+  { naziv: 'Home', putanja: '/en/' },
+  { naziv: 'Available', putanja: '/en/available/' },
+];
+
+const jsonLd = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'CollectionPage',
+    name: 'Available works',
+    url: apsolutno('/en/available/'),
+    inLanguage: 'en',
+    mainEntity: {
+      '@type': 'ItemList',
+      numberOfItems: dostupni.length,
+      itemListElement: dostupni.map((r, i) => ({
+        '@type': 'ListItem', position: i + 1,
+        url: apsolutno(putanjaRada(r, 'en')), name: naslovRada(r, 'en'),
+      })),
+    },
+  },
+  jsonLdMrvice(mrvice),
+];
+---
+
+<Osnovni
+  naslov="Available works — original sacred paintings for sale"
+  opis="Original sacred paintings currently available. Each is a one-off, hand-painted and signed, with medium, exact dimensions and price listed."
+  jezik="en"
+  prijevodi={{ hr: '/dostupni-radovi/', en: '/en/available/' }}
+  jsonLd={jsonLd}
+>
+  <Mrvice stavke={mrvice} jezik="en" />
+
+  <div class="omot">
+    <p class="nadnaslov">For sale</p>
+    <h1>Available works</h1>
+    <p class="uvod">
+      Every work here is an original — a single piece, hand-painted and signed.
+      No reproductions or prints appear in this list. Shipping within the EU is
+      possible; ask for a quote when you enquire.
+    </p>
+    <hr class="crta-zlatna" />
+
+    {dostupni.length === 0 ? (
+      <div class="prazno stog">
+        <h2>Nothing available at the moment</h2>
+        <p>
+          All finished works are currently in private collections — this changes
+          regularly. If you have a particular subject, patron saint or size in
+          mind, a work <a href="/en/commissions/">can be commissioned</a>.
+        </p>
+        <p><a href="/radovi/">Browse the full Croatian catalogue →</a></p>
+      </div>
+    ) : (
+      <ul class="mreza">
+        {dostupni.map((r, i) => <KarticaRada rad={r} jezik="en" prioritet={i < 2} prikaziCijenu />)}
+      </ul>
+    )}
+
+    <Upit jezik="en" />
+  </div>
+</Osnovni>
+
+<style>
+  .uvod { max-width: var(--mjera); color: var(--color-text-2); }
+</style>

@@ -1,0 +1,47 @@
+---
+import Glava from '../components/Glava.astro';
+import Zaglavlje from '../components/Zaglavlje.astro';
+import Podnozje from '../components/Podnozje.astro';
+
+// Podskupovi imaju unicode-range, pa preglednik povuče latin-ext tek kad
+// naiđe na kvačicu. Bez latin-exta č/ć/š/ž/đ ispadnu iz fonta.
+import '@fontsource-variable/eb-garamond/wght.css';
+import '@fontsource-variable/eb-garamond/wght-italic.css';
+import '@fontsource/alegreya-sans/400.css';
+import '@fontsource/alegreya-sans/400-italic.css';
+import '@fontsource/alegreya-sans/500.css';
+import '@fontsource/alegreya-sans/700.css';
+
+import '../styles/tokens.css';
+import '../styles/base.css';
+
+interface Props {
+  naslov: string;
+  opis: string;
+  jezik?: 'hr' | 'en';
+  prijevodi?: Partial<Record<'hr' | 'en', string>>;
+  ogSlika?: string;
+  ogSlikaAlt?: string;
+  ogTip?: 'website' | 'article';
+  noindex?: boolean;
+  jsonLd?: unknown[];
+}
+
+const { jezik = 'hr', prijevodi, ...ostalo } = Astro.props;
+const preskociTekst = jezik === 'hr' ? 'Prijeđi na sadržaj' : 'Skip to content';
+---
+
+<!doctype html>
+<html lang={jezik === 'hr' ? 'hr' : 'en'}>
+  <head>
+    <Glava jezik={jezik} prijevodi={prijevodi} {...ostalo} />
+  </head>
+  <body>
+    <a class="preskoci" href="#sadrzaj">{preskociTekst}</a>
+    <Zaglavlje jezik={jezik} prijevodi={prijevodi} />
+    <main id="sadrzaj">
+      <slot />
+    </main>
+    <Podnozje jezik={jezik} />
+  </body>
+</html>

@@ -1,0 +1,37 @@
+---
+/**
+ * Oznaka statusa — nosi ČETIRI signala, ne jedan.
+ *
+ * Audit je izmjerio da su ispune dostupno/prodano razmaknute 1.05:1, a obrubi
+ * 1.47:1 (svijetli) i 1.10:1 (tamni). Boja ovdje ne radi ništa ni za osobu s
+ * normalnim vidom, a pod protanopijom se zelena i smeđa poklope. Zato:
+ * boja + obrub + oblik točkice (puna/prazna/polovična) + ispisana riječ.
+ *
+ * Natpis je namjerno --step--1 (13px), a ne --step--2 (10px): riječ je jedini
+ * stvarno razlikovni signal, pa se mora moći pročitati.
+ */
+import { STATUS_NAZIV } from '../core/rad.mjs';
+
+interface Props {
+  status: string;
+  jezik?: 'hr' | 'en';
+  /** Za čitač ekrana: puni opis umjesto same riječi. */
+  opisno?: boolean;
+}
+const { status, jezik = 'hr', opisno = false } = Astro.props;
+
+const naziv = STATUS_NAZIV[jezik]?.[status] ?? status;
+
+const OBLIK = {
+  dostupno: jezik === 'hr' ? 'puna točka' : 'filled dot',
+  prodano: jezik === 'hr' ? 'prazna točka' : 'hollow dot',
+  rezervirano: jezik === 'hr' ? 'polovična točka' : 'half dot',
+};
+---
+
+<span class={`oznaka oznaka--${status}`}>
+  {naziv}
+  {opisno && OBLIK[status] && (
+    <span class="vizualno-skriveno">&nbsp;({OBLIK[status]})</span>
+  )}
+</span>

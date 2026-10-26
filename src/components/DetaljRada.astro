@@ -1,0 +1,218 @@
+---
+/**
+ * Cijela stranica jednog djela, dvojezično.
+ *
+ * Namjerno je JEDNA komponenta koju koriste i /radovi/[slug] i
+ * /en/works/[slug]. Dvije kopije predloška razišle bi se prvi put kad se
+ * nešto promijeni samo na jednoj strani, a to se primijeti tek mjesecima
+ * kasnije — i to na engleskoj verziji, koju nitko od nas ne čita redovito.
+ *
+ * Hrvatski opis je TIJELO markdown datoteke (može imati odlomke, ide kroz
+ * render()). Engleski je polje `opis_en` u frontmatteru. Asimetrija je
+ * namjerna: hrvatski je stvarni sadržaj, engleski je dodatak.
+ */
+import { getCollection, render } from 'astro:content';
+import { getImage } from 'astro:assets';
+
+import Slika from './Slika.astro';
+import Oznaka from './Oznaka.astro';
+import Mrvice from './Mrvice.astro';
+import Upit from './Upit.astro';
+import KarticaRada from './KarticaRada.astro';
+
+import { apsolutno } from '../site.config.mjs';
+import { temaPoSlugu } from '../core/taxonomije.mjs';
+import {
+  sortiraj, jeObjavljen, jeDostupan, glavnaSlika, ostaleSlike, naslovRada,
+  specRedak, altTekst, cijenaTekst, dimenzijeTekst, putanjaRada, mrviceRada,
+} from '../core/rad.mjs';
+
+interface Props { rad: any; jezik?: 'hr' | 'en'; }
+const { rad, jezik = 'hr' } = Astro.props;
+const d = rad.data;
+
+const T = {
+  hr: {
+    pocetna: 'Početna', radovi: 'Radovi',
+    upit: 'Pošalji upit', naruciSlican: 'Naruči sličan rad',
+    ikonografija: 'Ikonografija', podaci: 'Podaci o djelu',
+    tehnika: 'Tehnika', podloga: 'Podloga', dimenzije: 'Dimenzije',
+    godina: 'Godina', uokvireno: 'Uokvireno', teme: 'Teme',
+    da: 'da', ne: 'ne', oko: 'oko',
+    jos: 'Još fotografija',
+    slicniProdano: 'Slični dostupni radovi', slicni: 'Možda vas zanima',
+    prodano: 'Prodano',
+  },
+  en: {
+    pocetna: 'Home', radovi: 'Works',
+    upit: 'Enquire', naruciSlican: 'Commission something similar',
+    ikonografija: 'Iconography', podaci: 'Details',
+    tehnika: 'Medium', podloga: 'Surface', dimenzije: 'Dimensions',
+    godina: 'Year', uokvireno: 'Framed', teme: 'Themes',
+    da: 'yes', ne: 'no', oko: 'c.',
+    jos: 'More photographs',
+    slicniProdano: 'Similar available works', slicni: 'You may also like',
+    prodano: 'Sold',
+  },
+}[jezik];
+
+// Hrvatski opis iz tijela; engleski iz polja.
+const { Content } = await render(rad);
+const opisEnOdlomci = (d.opis_en ?? '').split(/\n{2,}/).filter(Boolean);
+
+const svi = sortiraj((await getCollection('radovi')).filter(jeObjavljen));
+const glavna = glavnaSlika(rad);
+const ostale = ostaleSlike(rad);
+const naslov = naslovRada(rad, jezik);
+const cijena = cijenaTekst(rad, jezik);
+const prodano = d.status === 'prodano';
+
+// Ista funkcija koju stranica koristi za JSON-LD mrvice — ne mogu se razići.
+const mrvice = mrviceRada(rad, jezik);
+
+const slicni = (d.povezani_radovi?.length
+  ? svi.filter((r) => d.povezani_radovi.includes(r.data.id))
+  : svi
+      .filter((r) => r.data.slug !== d.slug)
+      .map((r) => {
+        let bod = 0;
+        if (d.ciklus && r.data.ciklus === d.ciklus) bod += 5;
+        bod += (r.data.teme ?? []).filter((t) => (d.teme ?? []).includes(t)).length * 3;
+        if (r.data.kategorija === d.kategorija) bod += 1;
+        if (jeDostupan(r)) bod += 2;
+        return { r, bod };
+      })
+      .filter((x) => x.bod > 0)
+      .sort((a, b) => b.bod - a.bod)
+      .map((x) => x.r)
+).slice(0, 3);
+
+// Na engleskoj strani prikazuj samo prevedena djela — inače kartica vodi na 404.
+const slicniZaPrikaz = jezik === 'en'
+  ? slicni.filter((r) => r.data.naslov_en && r.data.slug_en)
+  : slicni;
+---
+
+<Mrvice stavke={mrvice} jezik={jezik} />
+
+<article class="omot rad">
+  <div class="rad__slika">
+    <Slika izvor={glavna.datoteka} alt={altTekst(rad, glavna, jezik)} prioritet />
+  </div>
+
+  <div class="rad__uz">
+    <h1>{naslov}</h1>
+    <p class="rad__spec brojke">{specRedak(rad, jezik)}</p>
+
+    <div class="rad__stanje">
+      <Oznaka status={d.status} jezik={jezik} opisno />
+      {prodano
+        ? <p class="rad__prodano brojke">
+            {T.prodano}{d.datum_prodaje ? ` ${new Date(d.datum_prodaje).getFullYear()}.` : ''}
+            {d.zbirka_vlasnik ? ` · ${d.zbirka_vlasnik}` : ''}
+          </p>
+        : cijena && <p class="rad__cijena brojke">{cijena}</p>}
+    </div>
+
+    <p>
+      {prodano
+        ? <a class="gumb gumb--glavni" href={jezik === 'hr' ? `/narudzbe/?ref=${d.slug}` : `/en/commissions/?ref=${d.slug}`}>{T.naruciSlican}</a>
+        : <a class="gumb gumb--glavni" href="#upit">{T.upit}</a>}
+    </p>
+
+    <div class="rad__opis">
+      {jezik === 'hr'
+        ? <Content />
+        : opisEnOdlomci.map((o) => <p>{o}</p>)}
+    </div>
+
+    {d.ikonografska_biljeska && jezik === 'hr' && (
+      <aside class="ikonografija">
+        <h2 class="nadnaslov">{T.ikonografija}</h2>
+        <p>{d.ikonografska_biljeska}</p>
+      </aside>
+    )}
+
+    <h2 class="vizualno-skriveno">{T.podaci}</h2>
+    <table class="spec brojke">
+      <tbody>
+        <tr><th scope="row">{T.tehnika}</th><td>{d.tehnika}</td></tr>
+        {d.podloga && <tr><th scope="row">{T.podloga}</th><td>{d.podloga}</td></tr>}
+        <tr><th scope="row">{T.dimenzije}</th><td>{dimenzijeTekst(d.dimenzije)}</td></tr>
+        <tr><th scope="row">{T.godina}</th><td>{d.godina_priblizna ? `${T.oko} ${d.godina}.` : `${d.godina}.`}</td></tr>
+        <tr><th scope="row">{T.uokvireno}</th><td>{d.uokvireno ? (d.opis_okvira ?? T.da) : T.ne}</td></tr>
+        {jezik === 'hr' && d.teme?.length > 0 && (
+          <tr>
+            <th scope="row">{T.teme}</th>
+            <td>{d.teme.map((t, i) => (
+              <>{i > 0 && ', '}<a href={`/radovi/tema/${t}/`}>{temaPoSlugu(t)?.naziv ?? t}</a></>
+            ))}</td>
+          </tr>
+        )}
+      </tbody>
+    </table>
+  </div>
+</article>
+
+{ostale.length > 0 && (
+  <section class="omot">
+    <h2 class="nadnaslov">{T.jos}</h2>
+    <ul class="mreza mreza--gusto detalji">
+      {ostale.map((s) => (
+        <li>
+          <span class="plocica">
+            <Slika
+              izvor={s.datoteka}
+              alt={altTekst(rad, s, jezik)}
+              sizes="(min-width: 64rem) 24rem, 45vw"
+              sirine={[400, 800, 1200]}
+            />
+          </span>
+          {s.potpis && <p class="kartica__meta">{s.potpis}</p>}
+        </li>
+      ))}
+    </ul>
+  </section>
+)}
+
+<div class="omot">
+  <Upit predmet={naslov} radId={d.id} jezik={jezik} />
+</div>
+
+{slicniZaPrikaz.length > 0 && (
+  <section class="omot">
+    <hr class="crta-zlatna" />
+    <h2>{prodano ? T.slicniProdano : T.slicni}</h2>
+    <ul class="mreza mreza--gusto">
+      {slicniZaPrikaz.map((r) => <KarticaRada rad={r} jezik={jezik} prikaziCijenu />)}
+    </ul>
+  </section>
+)}
+
+<style>
+  .rad { display: grid; gap: 2.5rem; align-items: start; }
+  @media (min-width: 64rem) {
+    .rad { grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr); gap: 3.5rem; }
+    .rad__slika { position: sticky; top: 2rem; }
+  }
+  .rad__slika :global(img), .rad__slika :global(picture) { width: 100%; height: auto; display: block; }
+  /* Slika na tinti: isti dojam kao kad rad visi na tamnom zidu galerije.
+     Na bež podlozi se pergament i platno stapaju i rad gubi rub. */
+  .rad__slika {
+    background: var(--color-ink);
+    padding: clamp(1rem, 3vw, 2rem);
+  }
+  .rad__spec { color: var(--color-muted); margin-top: -0.4rem; }
+  .rad__stanje { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; margin: 1.25rem 0; }
+  .rad__cijena { font-size: var(--step-2); margin: 0; }
+  .rad__prodano { color: var(--color-muted); margin: 0; }
+  .rad__opis { margin-top: 1.5rem; }
+  .ikonografija {
+    border-left: 2px solid var(--color-gold-rule);
+    padding: 1rem 0 1rem 1.25rem;
+    margin: 2rem 0;
+    background: var(--color-surface-sunk);
+  }
+  .ikonografija p { margin: 0; }
+  .detalji .plocica { aspect-ratio: 1 / 1; }
+</style>

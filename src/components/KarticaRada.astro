@@ -1,0 +1,69 @@
+---
+import Slika from './Slika.astro';
+import Oznaka from './Oznaka.astro';
+import {
+  glavnaSlika, naslovRada, specRedak, altTekst, cijenaTekst, putanjaRada,
+} from '../core/rad.mjs';
+
+interface Props {
+  rad: any;
+  jezik?: 'hr' | 'en';
+  /** Prvi red mreže se učitava odmah — ostalo lijeno. */
+  prioritet?: boolean;
+  prikaziCijenu?: boolean;
+}
+const { rad, jezik = 'hr', prioritet = false, prikaziCijenu = false } = Astro.props;
+
+const slika = glavnaSlika(rad);
+const naslov = naslovRada(rad, jezik);
+const cijena = prikaziCijenu ? cijenaTekst(rad, jezik) : null;
+
+/**
+ * Sve pločice u mreži imaju ISTU visinu, a slika se unutar njih skalira
+ * prema svom stvarnom omjeru (object-fit: contain).
+ *
+ * Isprobano je i suprotno — pločica koja prati omjer platna — ali je red
+ * ispao razbarušen: uspravni božuri bili su tri puta viši od ležećih lasti
+ * i oko nije imalo gdje stati. Ujednačena visina je mirnija i bliža načinu
+ * na koji se radovi vješaju u galeriji: donji rub u istoj liniji.
+ */
+const novo =
+  rad.data.datum_objave &&
+  Date.now() - new Date(rad.data.datum_objave).getTime() < 30 * 24 * 3600 * 1000;
+---
+
+<li>
+  <a href={putanjaRada(rad, jezik)} class="kartica">
+    <span class="plocica">
+      <Slika
+        izvor={slika.datoteka}
+        alt={altTekst(rad, slika, jezik)}
+        prioritet={prioritet}
+        sizes="(min-width: 64rem) 24rem, (min-width: 40rem) 45vw, 92vw"
+        sirine={[400, 800, 1200]}
+      />
+    </span>
+
+    <h3 class="kartica__naslov">{naslov}</h3>
+    <p class="kartica__meta brojke">{specRedak(rad, jezik)}</p>
+
+    <span class="kartica__red">
+      <Oznaka status={rad.data.status} jezik={jezik} opisno />
+      {novo && <span class="oznaka oznaka--novo">{jezik === 'hr' ? 'Novo' : 'New'}</span>}
+      {cijena && <span class="kartica__cijena brojke">{cijena}</span>}
+    </span>
+  </a>
+</li>
+
+<style>
+  .kartica { text-decoration: none; color: inherit; display: block; }
+  .kartica:hover .kartica__naslov { color: var(--color-gold); }
+  .kartica__red {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin-top: 0.6rem;
+  }
+  .kartica__cijena { margin-left: auto; color: var(--color-text-2); }
+</style>

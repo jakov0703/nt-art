@@ -1,0 +1,69 @@
+---
+import Osnovni from '../../layouts/Osnovni.astro';
+import Mrvice from '../../components/Mrvice.astro';
+import { site } from '../../site.config.mjs';
+import { jsonLdMrvice } from '../../core/rad.mjs';
+
+const mrvice = [
+  { naziv: 'Početna', putanja: '/' },
+  { naziv: 'Privatnost', putanja: '/privatnost/' },
+];
+---
+
+<Osnovni
+  naslov="Izjava o privatnosti"
+  opis="Koji se podaci prikupljaju putem obrasca za upit, zašto, koliko se čuvaju i koja su vaša prava."
+  jezik="hr"
+  jsonLd={[jsonLdMrvice(mrvice)]}
+>
+  <Mrvice stavke={mrvice} />
+
+  <div class="omot omot--usko">
+    <h1>Izjava o privatnosti</h1>
+
+    <h2>Koji se podaci prikupljaju</h2>
+    <p>
+      Samo oni koje sami upišete u obrazac za upit: ime, e-mail adresa i tekst
+      poruke, uz podatak o tome s koje ste stranice poslali upit (da se zna na
+      koji se rad odnosi).
+    </p>
+
+    <h2>Zašto</h2>
+    <p>
+      Isključivo da bi se odgovorilo na vaš upit i, ako dođe do kupnje ili
+      narudžbe, da bi se ona mogla dogovoriti i isporučiti. Podaci se ne
+      koriste za newsletter niti se ikome prosljeđuju ni prodaju.
+    </p>
+
+    <h2>Kolačići i praćenje</h2>
+    <p>
+      Ova stranica ne postavlja kolačiće za praćenje, ne koristi reklamne
+      mreže i ne ugrađuje sadržaj koji bi vas pratio preko drugih stranica.
+      Zato nema ni skočnog prozora o kolačićima.
+    </p>
+
+    <h2>Vaša prava</h2>
+    <p>
+      Možete u svakom trenutku zatražiti uvid u podatke koje ste poslali,
+      njihov ispravak ili brisanje. Dovoljan je e-mail{site.email ? ` na ${site.email}` : ''}.
+    </p>
+
+    <h2>Tko obrađuje podatke</h2>
+    <p>
+      {site.naziv}{site.grad ? `, ${site.grad}` : ''}. Kontakt za sva pitanja o
+      privatnosti: {site.email ? <a href={`mailto:${site.email}`}>{site.email}</a> : 'putem obrasca na stranici'}.
+    </p>
+    <p>
+      Upiti se šalju izravno e-mailom i ne prolaze kroz nijednu posredničku
+      uslugu. Prepiska se čuva dok je potrebna za dogovor i isporuku rada, a
+      nakon toga se briše na vaš zahtjev.
+    </p>
+    <p class="sitno">
+      Prodaja slika odvija se kao privatni dogovor između autorice i kupca.
+    </p>
+  </div>
+</Osnovni>
+
+<style>
+  h2 { margin-top: 2rem; }
+</style>

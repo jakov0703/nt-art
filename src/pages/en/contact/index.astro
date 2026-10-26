@@ -1,0 +1,54 @@
+---
+import Osnovni from '../../../layouts/Osnovni.astro';
+import Mrvice from '../../../components/Mrvice.astro';
+import Upit from '../../../components/Upit.astro';
+import { site } from '../../../site.config.mjs';
+import { jsonLdMrvice } from '../../../core/rad.mjs';
+
+const mrvice = [
+  { naziv: 'Home', putanja: '/en/' },
+  { naziv: 'Contact', putanja: '/en/contact/' },
+];
+---
+
+<Osnovni
+  naslov={`Contact — ${site.naziv}`}
+  opis="Get in touch about an available work or to commission a sacred painting."
+  jezik="en"
+  prijevodi={{ hr: '/kontakt/', en: '/en/contact/' }}
+  jsonLd={[jsonLdMrvice(mrvice)]}
+>
+  <Mrvice stavke={mrvice} jezik="en" />
+
+  <div class="omot omot--usko">
+    <p class="nadnaslov">Get in touch</p>
+    <h1>Contact</h1>
+
+    <p class="uvod">
+      For a specific work, the quickest route is the enquiry form on that work's
+      own page — the message then already says which piece you mean.
+    </p>
+    <p>
+      Correspondence in English is welcome. If you are not sure what you want,
+      describe the occasion and who it is for; that is usually enough to start.
+    </p>
+
+    <Upit jezik="en" />
+
+    <h2>Useful to include</h2>
+    <ul>
+      <li>who it is for and the occasion</li>
+      <li>the subject, if you have one in mind — a saint, the Virgin, an icon</li>
+      <li>roughly what size, or the size of the wall</li>
+      <li>whether there is a date it needs to be ready by</li>
+      <li>where it would be shipped to</li>
+    </ul>
+  </div>
+</Osnovni>
+
+<style>
+  .uvod { font-size: var(--step-1); color: var(--color-text-2); }
+  h2 { margin-top: 2.5rem; }
+  ul { max-width: var(--mjera); }
+  li { margin-bottom: 0.4rem; }
+</style>

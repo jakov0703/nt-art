@@ -1,0 +1,26 @@
+---
+import Osnovni from '../layouts/Osnovni.astro';
+---
+
+<Osnovni naslov="Stranica nije pronađena" opis="Tražena stranica ne postoji." jezik="hr" noindex>
+  <div class="omot omot--usko greska">
+    <p class="nadnaslov">404</p>
+    <h1>Ove stranice nema</h1>
+    <p class="uvod">
+      Adresa je možda pogrešno prepisana, ili je rad koji tražite premješten.
+      Prodani radovi ostaju na svojim adresama, pa ako ste imali link na rad
+      koji je u međuvremenu prodan — on i dalje radi.
+    </p>
+    <p class="akcije">
+      <a class="gumb gumb--glavni" href="/radovi/">Svi radovi</a>
+      <a class="gumb gumb--obrub" href="/">Početna</a>
+      <a class="gumb gumb--obrub" href="/kontakt/">Kontakt</a>
+    </p>
+  </div>
+</Osnovni>
+
+<style>
+  .greska { text-align: center; padding: 4rem 0 6rem; }
+  .uvod { color: var(--color-text-2); margin-inline: auto; }
+  .akcije { display: flex; gap: 0.9rem; justify-content: center; flex-wrap: wrap; margin-top: 2rem; }
+</style>

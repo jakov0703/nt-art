@@ -1,0 +1,83 @@
+---
+import { getCollection } from 'astro:content';
+import Osnovni from '../../../layouts/Osnovni.astro';
+import KarticaRada from '../../../components/KarticaRada.astro';
+import Mrvice from '../../../components/Mrvice.astro';
+import { apsolutno } from '../../../site.config.mjs';
+import {
+  sortiraj, jeObjavljen, imaEngleski, jsonLdMrvice, putanjaRada, naslovRada,
+} from '../../../core/rad.mjs';
+
+const svi = sortiraj((await getCollection('radovi')).filter(jeObjavljen).filter(imaEngleski));
+const ukupnoHr = (await getCollection('radovi')).filter(jeObjavljen).length;
+
+const mrvice = [
+  { naziv: 'Home', putanja: '/en/' },
+  { naziv: 'Works', putanja: '/en/works/' },
+];
+
+const jsonLd = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'CollectionPage',
+    name: 'Works',
+    url: apsolutno('/en/works/'),
+    inLanguage: 'en',
+    mainEntity: {
+      '@type': 'ItemList',
+      numberOfItems: svi.length,
+      itemListElement: svi.map((r, i) => ({
+        '@type': 'ListItem',
+        position: i + 1,
+        url: apsolutno(putanjaRada(r, 'en')),
+        name: naslovRada(r, 'en'),
+      })),
+    },
+  },
+  jsonLdMrvice(mrvice),
+];
+---
+
+<Osnovni
+  naslov="Works — sacred paintings and icons"
+  opis="The full catalogue of hand-painted sacred works: Christ, the Virgin Mary, saints and icons, with medium, dimensions and year for each."
+  jezik="en"
+  prijevodi={{ hr: '/radovi/', en: '/en/works/' }}
+  jsonLd={jsonLd}
+>
+  <Mrvice stavke={mrvice} jezik="en" />
+
+  <div class="omot">
+    <p class="nadnaslov">Catalogue</p>
+    <h1>Works</h1>
+    <hr class="crta-zlatna" />
+
+    {svi.length === 0 ? (
+      <div class="prazno">
+        <p>No works have been translated into English yet.</p>
+        <p><a href="/radovi/">See the full catalogue in Croatian →</a></p>
+      </div>
+    ) : (
+      <>
+        <ul class="mreza">
+          {svi.map((r, i) => <KarticaRada rad={r} jezik="en" prioritet={i < 2} prikaziCijenu />)}
+        </ul>
+        {/* Honest about what English visitors are not seeing. */}
+        {svi.length < ukupnoHr && (
+          <p class="napomena">
+            {svi.length} of {ukupnoHr} works are currently available in English.
+            The complete catalogue is on the <a href="/radovi/">Croatian pages</a>.
+          </p>
+        )}
+      </>
+    )}
+  </div>
+</Osnovni>
+
+<style>
+  .napomena {
+    margin-top: 2.5rem; padding-top: 1.25rem;
+    border-top: 1px solid var(--color-border-hairline);
+    color: var(--color-muted); font-size: var(--step--1);
+  }
+</style>

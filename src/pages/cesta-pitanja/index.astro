@@ -1,0 +1,114 @@
+---
+/**
+ * Česta pitanja — informativni klaster.
+ *
+ * SEO istraživanje ga je ocijenilo kao nisku konkurenciju: „ručno slikana
+ * slika ili print", „razlika original i reprodukcija", „koliko traje izrada".
+ * To su pitanja koja ljudi tipkaju prije nego uopće znaju od koga bi kupili.
+ *
+ * Sva pitanja o ikonopisu (jajčana tempera, zlatni list, pisanje ikona) su
+ * uklonjena — to je zanat kojim se autorica ne bavi i tekst bi obećavao nešto
+ * što ne radi. Umjesto toga: impasto, akril, njezini stvarni uvjeti.
+ */
+import Osnovni from '../../layouts/Osnovni.astro';
+import Mrvice from '../../components/Mrvice.astro';
+import { apsolutno } from '../../site.config.mjs';
+import { jsonLdMrvice } from '../../core/rad.mjs';
+
+const mrvice = [
+  { naziv: 'Početna', putanja: '/' },
+  { naziv: 'Česta pitanja', putanja: '/cesta-pitanja/' },
+];
+
+const PITANJA = [
+  {
+    p: 'Koja je razlika između ručno slikane slike i printa?',
+    o: 'Print je fotografska reprodukcija otisnuta na papir ili platno — može ih postojati neograničeno mnogo i svi su isti. Ručno slikana slika ima fizičku teksturu boje, potez kista koji se vidi pod kosim svjetlom, i postoji u jednom jedinom primjerku. Uživo se razlika vidi odmah; na fotografiji gotovo nikako.',
+  },
+  {
+    p: 'Što je impasto tehnika?',
+    o: 'Impasto znači da se boja nanosi gusto, u debelim slojevima, umjesto da se razmazuje u tanak i ravan sloj. Potezi kista ili slikarskog noža ostaju vidljivi i opipljivi, pa slika ima reljef. Zbog toga se mijenja ovisno o tome kako na nju pada svjetlo — ujutro izgleda drukčije nego navečer pod žaruljom.',
+  },
+  {
+    p: 'Kako mogu biti siguran da je slika original?',
+    o: 'Svaka slika je potpisana. Uživo je najjednostavniji test kose svjetlo: original ima reljef i vidljive poteze kista, print je gladak. Kod narudžbe možete dobiti i fotografije rada u nastanku.',
+  },
+  {
+    p: 'Koliko traje izrada slike po narudžbi?',
+    o: 'Od tjedan dana do nekoliko mjeseci, ovisno o veličini i motivu. Za slike vezane uz datum — krizmu, vjenčanje, imendan — javite se nekoliko mjeseci ranije.',
+  },
+  {
+    p: 'Koja veličina slike odgovara mom zidu?',
+    o: 'Za slike iznad komada namještaja uobičajeno je da slika bude široka otprilike dvije trećine namještaja ispod nje. Za molitveni kutak i manje prostore formati od 40×50 cm obično su dovoljni. Ako niste sigurni, izmjerite zid i javite mjere — lakše je preporučiti nego pogađati.',
+  },
+  {
+    p: 'Dolaze li slike uokvirene?',
+    o: 'Ne. Platno je napeto na drveni podokvir i bočno oslikano, pa slika može visjeti i bez okvira. Ako okvir želite, birate ga sami prema svom prostoru.',
+  },
+  {
+    p: 'Kako se brinuti za sliku na platnu?',
+    o: 'Izbjegavati izravno sunce i vlagu, ne vješati iznad radijatora ni u kupaonicu. Prašina se skida suhim mekim kistom ili mikrofibrom — nikad mokrom krpom i nikad sredstvima za čišćenje. Kod impasto slika pazite da se ne pritisne reljef boje.',
+  },
+  {
+    p: 'Je li slika prikladan dar za krizmu ili vjenčanje?',
+    o: 'Jest, i to je jedan od rijetkih darova koji se ne potroši i ne zaboravi. Sakralna slika za krizmanika ili mladence ostaje u domu godinama. Za darove vezane uz datum javite se ranije jer izrada traje.',
+  },
+  {
+    p: 'Slikate li portrete ili slike prema fotografiji?',
+    o: 'Ne. Radim sakralne motive i slobodne kompozicije — cvijeće, ptice, prirodu — ali ne izrađujem portrete ni slike prema priloženoj fotografiji.',
+  },
+  {
+    p: 'Šaljete li slike izvan Hrvatske?',
+    o: 'Zasad šaljem samo unutar Hrvatske. U Zagrebu i okolici moguće je osobno preuzimanje po dogovoru.',
+  },
+];
+
+const jsonLd = [
+  jsonLdMrvice(mrvice),
+  {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    '@id': `${apsolutno('/cesta-pitanja/')}#faq`,
+    mainEntity: PITANJA.map((x) => ({
+      '@type': 'Question',
+      name: x.p,
+      acceptedAnswer: { '@type': 'Answer', text: x.o },
+    })),
+  },
+];
+---
+
+<Osnovni
+  naslov="Česta pitanja — originalne slike i narudžbe"
+  opis="Razlika između ručno slikane slike i printa, što je impasto tehnika, koja veličina odgovara zidu i kako se naručuje sakralna slika."
+  jezik="hr"
+  jsonLd={jsonLd}
+>
+  <Mrvice stavke={mrvice} />
+
+  <div class="omot omot--usko">
+    <p class="nadnaslov">Pitanja</p>
+    <h1>Česta pitanja</h1>
+    <hr class="crta-zlatna" />
+
+    <dl class="faq">
+      {PITANJA.map((x) => (
+        <div class="faq__stavka">
+          <dt>{x.p}</dt>
+          <dd>{x.o}</dd>
+        </div>
+      ))}
+    </dl>
+
+    <p class="kraj">
+      Nešto nije odgovoreno? <a href="/kontakt/">Javite se</a> — nema glupog pitanja.
+    </p>
+  </div>
+</Osnovni>
+
+<style>
+  .faq__stavka { border-bottom: 1px solid var(--color-border-hairline); padding: 1.15rem 0; }
+  .faq dt { font-family: var(--font-display); font-size: var(--step-1); margin-bottom: 0.45rem; }
+  .faq dd { margin: 0; max-width: var(--mjera); color: var(--color-text-2); }
+  .kraj { margin-top: 2rem; }
+</style>

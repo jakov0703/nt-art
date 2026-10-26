@@ -1,0 +1,74 @@
+---
+import { getCollection } from 'astro:content';
+import Osnovni from '../../layouts/Osnovni.astro';
+import KarticaRada from '../../components/KarticaRada.astro';
+import { site } from '../../site.config.mjs';
+import { sortiraj, jeObjavljen, jeDostupan, imaEngleski } from '../../core/rad.mjs';
+
+// English listings show only translated works — a card linking to a page that
+// does not exist is a 404 the visitor blames on us.
+const svi = sortiraj((await getCollection('radovi')).filter(jeObjavljen).filter(imaEngleski));
+const dostupni = svi.filter(jeDostupan);
+---
+
+<Osnovni
+  naslov={`Hand-painted sacred art | ${site.naziv}`}
+  opis={site.opis_en}
+  jezik="en"
+  prijevodi={{ hr: '/', en: '/en/' }}
+>
+  <section class="uvodnik omot">
+    <p class="nadnaslov">Sacred painting</p>
+    <h1>Hand-painted sacred art</h1>
+    <p class="uvodnik__tekst">
+      Christ, the Virgin Mary, saints and icons — painted by hand, one at a time.
+      Every work is an original: no prints, no editions, no two alike. Painted in
+      Croatia for homes, prayer corners, chapels and parish churches.
+    </p>
+    <p class="uvodnik__akcije">
+      <a class="gumb gumb--glavni" href="/en/available/">See available works</a>
+      <a class="gumb gumb--obrub" href="/en/commissions/">Commission a work</a>
+    </p>
+    <hr class="crta-zlatna" />
+  </section>
+
+  {svi.length > 0 ? (
+    <section class="omot">
+      <h2>Selected works</h2>
+      <ul class="mreza mreza--gusto">
+        {svi.slice(0, 6).map((r, i) => <KarticaRada rad={r} jezik="en" prioritet={i < 3} />)}
+      </ul>
+      <p class="dalje"><a href="/en/works/">All works →</a></p>
+    </section>
+  ) : (
+    <section class="omot">
+      <div class="prazno">
+        <p>
+          The English pages are still being translated. The full catalogue is
+          available in Croatian — <a href="/radovi/">see all works</a>.
+        </p>
+      </div>
+    </section>
+  )}
+
+  {dostupni.length > 0 && (
+    <section class="omot traka">
+      <h2>Currently available</h2>
+      <ul class="mreza mreza--gusto">
+        {dostupni.slice(0, 3).map((r) => <KarticaRada rad={r} jezik="en" prikaziCijenu />)}
+      </ul>
+      <p class="dalje"><a href="/en/available/">All available works →</a></p>
+    </section>
+  )}
+</Osnovni>
+
+<style>
+  .uvodnik { padding-top: 3rem; }
+  .uvodnik h1 { font-size: var(--step-5); max-width: 16ch; }
+  .uvodnik__tekst { font-size: var(--step-1); max-width: 46ch; color: var(--color-text-2); }
+  .uvodnik__akcije { display: flex; gap: 0.9rem; flex-wrap: wrap; margin-top: 1.75rem; }
+  section { margin-bottom: 4rem; }
+  .dalje { margin-top: 1.5rem; }
+  .dalje a { font-family: var(--font-display); font-size: var(--step-1); text-decoration: none; }
+  .traka { border-top: 1px solid var(--color-border-hairline); padding-top: 2.5rem; }
+</style>

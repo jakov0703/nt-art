@@ -1,0 +1,108 @@
+---
+/**
+ * Tematske stranice.
+ *
+ * PRAG: tema dobiva vlastiti URL tek kad ima 3+ objavljena rada. Ispod praga
+ * URL se uopće ne generira — tema ostaje samo oznaka na djelu.
+ *
+ * Zašto: prazna ili jednočlana kategorijska stranica je SEO teret, ne korist.
+ * Google je vidi kao tanak sadržaj i to se prelije na cijelu domenu. Stranica
+ * kreće s malo radova, pa bi bez praga odmah imala desetak praznih grana.
+ *
+ * Polje `teme` popunjava se od prvog dana, pa se stranice upale SAME čim prag
+ * padne — bez ijedne izmjene koda i bez ponovnog označavanja starih radova.
+ *
+ * Iznimke koje su uvijek žive: `sakralno` i `ostalo` — one su okosnica, ne grana.
+ */
+import { getCollection } from 'astro:content';
+import Osnovni from '../../../layouts/Osnovni.astro';
+import KarticaRada from '../../../components/KarticaRada.astro';
+import Mrvice from '../../../components/Mrvice.astro';
+import { apsolutno } from '../../../site.config.mjs';
+import { TEME, PRAG_TEME, temaPoSlugu } from '../../../core/taxonomije.mjs';
+import { UVODI_TEMA as UVODI } from '../../../core/uvodi-tema.mjs';
+import {
+  sortiraj, jeObjavljen, jsonLdMrvice, putanjaRada, naslovRada,
+} from '../../../core/rad.mjs';
+
+export async function getStaticPaths() {
+  const svi = (await getCollection('radovi')).filter(jeObjavljen);
+
+  const putanje = [];
+  for (const tema of TEME) {
+    const radovi = svi.filter((r) => (r.data.teme ?? []).includes(tema.slug));
+    const uvod = UVODI[tema.slug];
+    if (!uvod) continue;
+    if (radovi.length < PRAG_TEME.radova) continue;
+    if (uvod.uvod.split(/\s+/).length < PRAG_TEME.rijeci) continue;
+    putanje.push({ params: { tema: tema.slug }, props: { tema: tema.slug } });
+  }
+
+  // Okosnica je uvijek živa, bez obzira na broj radova.
+  for (const kat of ['sakralno', 'ostalo']) {
+    putanje.push({ params: { tema: kat }, props: { tema: kat } });
+  }
+  return putanje;
+}
+
+const { tema } = Astro.props;
+const uvod = UVODI[tema];
+
+const svi = sortiraj((await getCollection('radovi')).filter(jeObjavljen));
+const radovi = ['sakralno', 'ostalo'].includes(tema)
+  ? svi.filter((r) => r.data.kategorija === tema)
+  : svi.filter((r) => (r.data.teme ?? []).includes(tema));
+
+const mrvice = [
+  { naziv: 'Početna', putanja: '/' },
+  { naziv: 'Radovi', putanja: '/radovi/' },
+  { naziv: temaPoSlugu(tema)?.naziv ?? uvod.naslov, putanja: `/radovi/tema/${tema}/` },
+];
+
+const jsonLd = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'CollectionPage',
+    name: uvod.naslov,
+    url: apsolutno(`/radovi/tema/${tema}/`),
+    mainEntity: {
+      '@type': 'ItemList',
+      numberOfItems: radovi.length,
+      itemListElement: radovi.map((r, i) => ({
+        '@type': 'ListItem', position: i + 1,
+        url: apsolutno(putanjaRada(r, 'hr')), name: naslovRada(r, 'hr'),
+      })),
+    },
+  },
+  jsonLdMrvice(mrvice),
+];
+---
+
+<Osnovni naslov={uvod.title} opis={uvod.meta} jezik="hr" jsonLd={jsonLd}>
+  <Mrvice stavke={mrvice} />
+
+  <div class="omot">
+    <p class="nadnaslov">Tema</p>
+    <h1>{uvod.naslov}</h1>
+
+    <div class="uvod">
+      {uvod.uvod.split(/\n{2,}/).map((o) => <p>{o}</p>)}
+    </div>
+    <hr class="crta-zlatna" />
+
+    {radovi.length === 0 ? (
+      <div class="prazno stog">
+        <p>U ovoj temi još nema objavljenih radova.</p>
+        <p><a href="/narudzbe/">Rad s ovom tematikom može se naručiti →</a></p>
+      </div>
+    ) : (
+      <ul class="mreza">
+        {radovi.map((r, i) => <KarticaRada rad={r} jezik="hr" prioritet={i < 2} prikaziCijenu />)}
+      </ul>
+    )}
+  </div>
+</Osnovni>
+
+<style>
+  .uvod { max-width: var(--mjera); color: var(--color-text-2); }
+</style>

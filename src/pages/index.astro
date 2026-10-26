@@ -1,0 +1,282 @@
+---
+/**
+ * Naslovnica.
+ *
+ * STANJE NA POČETKU: autorica ima jedan sakralni rad (Presveto Srce Isusovo,
+ * rađen po narudžbi, bez fotografije) i dva nesakralna rada koja su stvarno
+ * fotografirana. Zato naslovnica NE glumi galeriju sakralnih slika koje
+ * nemamo — vodi prema narudžbi, a postojeće radove pokazuje kao dokaz da zna
+ * slikati, što i jesu.
+ *
+ * Čim dođu fotografije sakralnih radova, blok „Izdvojeno" se popuni sam i
+ * ovaj tekst se može skratiti.
+ */
+import { getCollection } from 'astro:content';
+import Osnovni from '../layouts/Osnovni.astro';
+import KarticaRada from '../components/KarticaRada.astro';
+import Slika from '../components/Slika.astro';
+import { site, cjenik } from '../site.config.mjs';
+import {
+  sortiraj, jeObjavljen, jeDostupan, glavnaSlika, naslovRada, altTekst, putanjaRada,
+} from '../core/rad.mjs';
+
+const svi = sortiraj((await getCollection('radovi')).filter(jeObjavljen));
+const dostupni = svi.filter(jeDostupan);
+const sakralni = svi.filter((r) => r.data.kategorija === 'sakralno');
+
+const istaknuti = svi.filter((r) => r.data.istaknuto);
+const zaPrikaz = (istaknuti.length >= 2 ? istaknuti : svi).slice(0, 6);
+
+// Hero pokazuje pravu sliku. Na stranici slikarice tekst bez slike u prvom
+// zaslonu je promašaj — posjetitelj je došao vidjeti radove.
+// Bira uspravni rad ako postoji, jer bolje popuni stupac.
+const heroRad =
+  zaPrikaz.find((r) => r.data.dimenzije.visina_cm >= r.data.dimenzije.sirina_cm)
+  ?? zaPrikaz[0]
+  ?? null;
+const heroSlika = heroRad ? glavnaSlika(heroRad) : null;
+// Ostatak mreže ne ponavlja rad koji je već u herou.
+const mrezaRadovi = zaPrikaz.filter((r) => r !== heroRad);
+---
+
+<Osnovni
+  naslov={`Ručno slikane sakralne slike po narudžbi | ${site.naziv}`}
+  opis={site.opis_hr}
+  jezik="hr"
+  prijevodi={{ hr: '/', en: '/en/' }}
+>
+  <section class="hero">
+    <div class="omot hero__mreza">
+      <div class="hero__tekst">
+        <p class="hero__nad">Sakralno slikarstvo · Zagreb</p>
+        <h1>Ručno slikane<br />sakralne slike</h1>
+        <p class="hero__uvod">
+          Presveto Srce Isusovo, Gospa, sveci — slikani rukom, akrilom na
+          platnu, jedan po jedan. Svaka slika nastaje za određenog čovjeka i
+          određeni zid, pa nema dvije iste.
+        </p>
+        <p class="hero__akcije">
+          <a class="gumb gumb--svijetli" href="/narudzbe/">Naruči sliku</a>
+          {dostupni.length > 0 && (
+            <a class="gumb gumb--duh" href="/dostupni-radovi/">Dostupni radovi</a>
+          )}
+        </p>
+      </div>
+
+      {heroRad && heroSlika && (
+        <figure class="hero__slika">
+          <a href={putanjaRada(heroRad, 'hr')}>
+            <Slika
+              izvor={heroSlika.datoteka}
+              alt={altTekst(heroRad, heroSlika, 'hr')}
+              prioritet
+              sizes="(min-width: 64rem) 30rem, 80vw"
+              sirine={[400, 800, 1200]}
+            />
+          </a>
+          <figcaption>
+            {naslovRada(heroRad, 'hr')} · {heroRad.data.godina}.
+          </figcaption>
+        </figure>
+      )}
+    </div>
+  </section>
+
+  {/* Dok nema fotografiranih sakralnih radova, naslovnica objašnjava kako
+      narudžba teče — to je ono što posjetitelj u ovom trenutku treba. */}
+  {sakralni.length === 0 && (
+    <section class="omot kako">
+      <div class="kako__mreza">
+        <div>
+          <p class="nadnaslov">Narudžba</p>
+          <h2>Kako nastaje slika</h2>
+          <ol class="koraci">
+            <li>
+              <strong>Javite se.</strong> Recite koji motiv želite, za koga je i
+              gdje će slika stajati. Ne morate imati gotovu zamisao.
+            </li>
+            <li>
+              <strong>Dogovor.</strong> Utvrdimo motiv, veličinu, rok i cijenu.
+            </li>
+            <li>
+              <strong>Slikanje.</strong> Traje od tjedan dana do nekoliko
+              mjeseci, ovisno o formatu i složenosti motiva.
+            </li>
+            <li>
+              <strong>Preuzimanje.</strong> Osobno u Zagrebu ili poštom unutar
+              Hrvatske.
+            </li>
+          </ol>
+        </div>
+
+        <div class="cjenik-blok">
+          <p class="nadnaslov">Okvirne cijene</p>
+          <table class="cjenik brojke">
+            <tbody>
+              {cjenik.map((c) => (
+                <tr>
+                  <th scope="row">{c.format}</th>
+                  <td>{c.od} – {c.do} €</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          <p class="sitno">
+            Konačna cijena ovisi o motivu i složenosti. Bez predujma — plaća se
+            kad je slika gotova.
+          </p>
+          <p><a class="gumb gumb--glavni" href="/narudzbe/">Više o narudžbama</a></p>
+        </div>
+      </div>
+    </section>
+  )}
+
+  {zaPrikaz.length > 0 && (
+    <section class="omot">
+      <hr class="crta-zlatna" />
+      <h2>Radovi</h2>
+      {sakralni.length === 0 && (
+        <p class="napomena">
+          Sakralni radovi dosad su nastajali po narudžbi i otišli su naručiteljima,
+          pa ih ovdje još nema fotografiranih. Ovo su radovi izvan sakralne
+          tematike — stoje ovdje jer pokazuju kako slikam.
+        </p>
+      )}
+      <ul class="mreza mreza--gusto">
+        {mrezaRadovi.map((r) => (
+          <KarticaRada rad={r} jezik="hr" prikaziCijenu />
+        ))}
+      </ul>
+      <p class="dalje"><a href="/radovi/">Svi radovi →</a></p>
+    </section>
+  )}
+
+  <section class="omot omot--usko onama">
+    <hr class="crta-zlatna crta-zlatna--sredina" />
+    <h2>Zašto sakralno</h2>
+    <p>
+      Slikam još od malih nogu. Sve je krenulo kada mi je mama kupila platno i
+      poželjela da joj naslikam Milosrdnog Isusa — tada sam se prvi put
+      ozbiljnije upustila u slikanje.
+    </p>
+    <p>
+      Sakralni motivi su mi najbliži jer mi vjera daje smisao u životu. Kroz
+      slike mogu s ljudima podijeliti svoje iskustvo vjere i mali dio onoga kako
+      je ja doživljavam.
+    </p>
+    <p><a class="gumb gumb--obrub" href="/o-meni/">O meni</a></p>
+  </section>
+</Osnovni>
+
+<style>
+  /* --- HERO ------------------------------------------------------
+     Tamna ploha preko cijele širine. Razlog nije ukras: cijela je
+     stranica inače jedan ton pergamenta pa sve izgleda ravno, a na
+     tinti zlato i slika dobiju dubinu koju na bež podlozi nemaju.
+     --------------------------------------------------------------- */
+  .hero {
+    background: var(--color-ink);
+    color: var(--color-on-ink);
+    padding: clamp(2.5rem, 5vw, 4rem) 0;
+    margin-bottom: 4.5rem;
+    /* Tanka zlatna linija na dnu — jedini ukras koji si hero dopušta. */
+    border-bottom: 1px solid var(--color-gold-rule);
+  }
+  .hero__mreza {
+    display: grid;
+    gap: clamp(2rem, 5vw, 3.5rem);
+    align-items: center;
+  }
+  @media (min-width: 62rem) {
+    .hero__mreza { grid-template-columns: 1.1fr 0.9fr; }
+  }
+  /* Slika ne smije gurnuti prvi zaslon predaleko: ograničena je visinom
+     vidljivog prozora, ne vlastitim omjerom. Inače uspravno platno samo
+     odgurne sve ispod sebe izvan ekrana.
+
+     `width: 100%` je OBAVEZAN uz max-height: bez njega uspravna slika s
+     object-fit: contain rastegne sam <img> element šire od stupca i na
+     mobitelu izbaci vodoravnu traku za pomicanje. */
+  .hero__slika :global(img) {
+    max-height: min(58vh, 28rem);
+    width: 100%;
+    object-fit: contain;
+  }
+
+  .hero__nad {
+    font-family: var(--font-display);
+    font-variant-caps: small-caps;
+    font-feature-settings: 'smcp' 1, 'onum' 1;
+    letter-spacing: 0.1em;
+    color: var(--color-gold-on-ink);
+    margin: 0 0 0.9rem;
+  }
+  .hero h1 {
+    font-size: clamp(2.6rem, 6vw, 4.2rem);
+    line-height: 1.04;
+    letter-spacing: -0.015em;
+    color: var(--color-on-ink);
+    margin: 0 0 1.4rem;
+  }
+  .hero__uvod {
+    font-size: var(--step-1);
+    max-width: 46ch;
+    color: var(--color-on-ink-muted);
+    margin-bottom: 2rem;
+  }
+  .hero__akcije { display: flex; gap: 0.9rem; flex-wrap: wrap; margin: 0; }
+
+  .hero__slika { margin: 0; }
+  .hero__slika a {
+    display: block;
+    /* Uski zlatni obrub oko slike — kao paspartu, ne kao okvir. */
+    padding: 0.7rem;
+    border: 1px solid rgba(217, 181, 105, 0.35);
+    transition: border-color var(--prijelaz);
+  }
+  .hero__slika a:hover { border-color: var(--color-gold-on-ink); }
+  .hero__slika :global(img), .hero__slika :global(picture) {
+    display: block; width: 100%; height: auto;
+  }
+  .hero__slika figcaption {
+    margin-top: 0.9rem;
+    font-size: var(--step--1);
+    color: var(--color-on-ink-muted);
+    font-family: var(--font-display);
+    font-feature-settings: 'onum' 1;
+  }
+
+  section { margin-bottom: 4rem; }
+  .dalje { margin-top: 1.5rem; }
+  .dalje a { font-family: var(--font-display); font-size: var(--step-1); text-decoration: none; }
+
+  .kako__mreza {
+    display: grid;
+    gap: clamp(2rem, 5vw, 4rem);
+    align-items: start;
+  }
+  @media (min-width: 58rem) {
+    .kako__mreza { grid-template-columns: 1.25fr 0.75fr; }
+  }
+  .koraci { padding-left: 1.2rem; margin-top: 0; }
+  .koraci li { margin-bottom: 0.9rem; max-width: 52ch; }
+
+  /* Cjenik dobiva vlastitu uvučenu plohu — inače lebdi u praznini. */
+  .cjenik-blok {
+    background: var(--color-surface);
+    border-top: 2px solid var(--color-gold-rule);
+    padding: 1.5rem;
+  }
+  .cjenik { border-collapse: collapse; margin: 0.5rem 0 1rem; width: 100%; }
+  .cjenik th, .cjenik td { text-align: left; padding: 0.55rem 0;
+    border-bottom: 1px solid var(--color-border-hairline); }
+  .cjenik th { font-weight: 400; color: var(--color-muted); }
+  .cjenik tr:last-child th, .cjenik tr:last-child td { border-bottom: 0; }
+
+  .napomena {
+    max-width: var(--mjera); color: var(--color-muted); font-size: var(--step--1);
+    border-left: 2px solid var(--color-border-hairline); padding-left: 0.9rem;
+  }
+  .onama { text-align: center; }
+  .onama p { margin-inline: auto; max-width: 52ch; }
+</style>

@@ -1,0 +1,33 @@
+---
+/**
+ * Odredište nakon slanja upita. noindex, follow — ovo je cilj konverzije,
+ * ne stranica za pretraživače. `follow` jer i dalje vodi dalje po stranici.
+ */
+import Osnovni from '../../layouts/Osnovni.astro';
+---
+
+<Osnovni
+  naslov="Hvala na upitu"
+  opis="Upit je poslan."
+  jezik="hr"
+  noindex
+>
+  <div class="omot omot--usko hvala">
+    <hr class="crta-zlatna crta-zlatna--sredina" />
+    <h1>Hvala na upitu</h1>
+    <p class="uvod">
+      Poruka je stigla. Odgovor obično slijedi u roku od dan-dva — ako se ne
+      javi dulje, provjerite i mapu neželjene pošte.
+    </p>
+    <p class="akcije">
+      <a class="gumb gumb--obrub" href="/dostupni-radovi/">Dostupni radovi</a>
+      <a class="gumb gumb--obrub" href="/radovi/">Svi radovi</a>
+    </p>
+  </div>
+</Osnovni>
+
+<style>
+  .hvala { text-align: center; padding: 4rem 0 6rem; }
+  .uvod { font-size: var(--step-1); color: var(--color-text-2); margin-inline: auto; }
+  .akcije { display: flex; gap: 0.9rem; justify-content: center; flex-wrap: wrap; margin-top: 2rem; }
+</style>

@@ -1,0 +1,138 @@
+---
+/**
+ * Obrazac za upit.
+ *
+ * Bez backenda. Ako `site.form_endpoint` nije postavljen, obrazac se gracizno
+ * degradira na predpopunjeni mailto: + vidljivi e-mail + Viber/WhatsApp —
+ * što hrvatski kupci sakralne umjetnosti ionako najviše koriste. Ništa se
+ * ne "pokvari" dok endpoint ne postoji; samo se promijeni put.
+ *
+ * Protiv spama: honeypot + vremenska oznaka. Nikad CAPTCHA — ona odbija
+ * stvarne kupce, a ovdje je riječ o nekoliko upita mjesečno.
+ */
+import { site } from '../site.config.mjs';
+
+interface Props {
+  /** Naslov djela o kojem se pita; prazno = opći upit. */
+  predmet?: string;
+  radId?: string;
+  jezik?: 'hr' | 'en';
+  kompaktno?: boolean;
+}
+const { predmet, radId, jezik = 'hr', kompaktno = false } = Astro.props;
+
+const T = {
+  hr: {
+    naslov: predmet ? 'Upit za ovo djelo' : 'Pošaljite upit',
+    ime: 'Vaše ime', email: 'E-mail', poruka: 'Poruka',
+    privola: 'Suglasan/na sam da se moji podaci koriste za odgovor na ovaj upit.',
+    posalji: 'Pošalji upit',
+    mailom: 'Pošalji e-mailom',
+    bezEndpointa: 'Upit se šalje e-mailom — klikom se otvara vaš program za poštu s već pripremljenom porukom.',
+    nemaKontakta: 'Kontakt podaci još nisu postavljeni. Prije objave upišite e-mail u src/site.config.mjs.',
+    ili: 'ili',
+    zadanaPoruka: predmet
+      ? `Poštovani,\n\nzanima me djelo „${predmet}".\n\nLijep pozdrav,`
+      : 'Poštovani,\n\n',
+  },
+  en: {
+    naslov: predmet ? 'Enquire about this work' : 'Send an enquiry',
+    ime: 'Your name', email: 'Email', poruka: 'Message',
+    privola: 'I agree that my details may be used to reply to this enquiry.',
+    posalji: 'Send enquiry',
+    mailom: 'Send by email',
+    bezEndpointa: 'Enquiries go by email — this opens your mail app with the message ready.',
+    nemaKontakta: 'Contact details are not configured yet.',
+    ili: 'or',
+    zadanaPoruka: predmet
+      ? `Hello,\n\nI am interested in "${predmet}".\n\nBest regards,`
+      : 'Hello,\n\n',
+  },
+}[jezik];
+
+const naslovMaila = predmet
+  ? (jezik === 'hr' ? `Upit: ${predmet}` : `Enquiry: ${predmet}`)
+  : (jezik === 'hr' ? 'Upit sa stranice' : 'Enquiry from website');
+
+const mailto = site.email
+  ? `mailto:${site.email}?subject=${encodeURIComponent(naslovMaila)}&body=${encodeURIComponent(T.zadanaPoruka)}`
+  : null;
+
+const whatsapp = site.whatsapp
+  ? `https://wa.me/${site.whatsapp}?text=${encodeURIComponent(naslovMaila)}`
+  : null;
+---
+
+<section class={`upit ${kompaktno ? 'upit--kompaktno' : ''}`} id="upit">
+  <h2 class="upit__naslov">{T.naslov}</h2>
+
+  {site.form_endpoint ? (
+    <form method="POST" action={site.form_endpoint} class="stog">
+      <input type="hidden" name="predmet" value={predmet ?? ''} />
+      <input type="hidden" name="rad_id" value={radId ?? ''} />
+      <input type="hidden" name="stranica" value={Astro.url.pathname} />
+      {/* Honeypot — stvarni korisnik ovo nikad ne vidi ni ne ispuni. */}
+      <div class="med" aria-hidden="true">
+        <label for="tvrtka">Tvrtka</label>
+        <input type="text" id="tvrtka" name="tvrtka" tabindex="-1" autocomplete="off" />
+      </div>
+
+      <div>
+        <label for="ime">{T.ime}</label>
+        <input type="text" id="ime" name="ime" required autocomplete="name" />
+      </div>
+      <div>
+        <label for="email">{T.email}</label>
+        <input type="email" id="email" name="email" required autocomplete="email" />
+      </div>
+      <div>
+        <label for="poruka">{T.poruka}</label>
+        <textarea id="poruka" name="poruka" required>{T.zadanaPoruka}</textarea>
+      </div>
+
+      {/* Neoznačeno po defaultu — unaprijed označena privola nije privola. */}
+      <label class="privola">
+        <input type="checkbox" name="privola" required />
+        <span>{T.privola} <a href="/privatnost/">{jezik === 'hr' ? 'Više' : 'More'}</a></span>
+      </label>
+
+      <button type="submit" class="gumb gumb--glavni">{T.posalji}</button>
+    </form>
+  ) : mailto ? (
+    <div class="stog">
+      <p class="sitno">{T.bezEndpointa}</p>
+      <p class="upit__kanali">
+        <a class="gumb gumb--glavni" href={mailto}>{T.mailom}</a>
+        {whatsapp && <a class="gumb gumb--obrub" href={whatsapp} rel="noopener">WhatsApp</a>}
+        {site.viber && <a class="gumb gumb--obrub" href={`viber://chat?number=${site.viber}`}>Viber</a>}
+      </p>
+      <p class="sitno">{T.ili} <a href={`mailto:${site.email}`}>{site.email}</a></p>
+    </div>
+  ) : (
+    <p class="poruka poruka--greska">
+      <span class="poruka__ikona" aria-hidden="true">!</span>
+      <span>{T.nemaKontakta}</span>
+    </p>
+  )}
+</section>
+
+<style>
+  .upit {
+    border: 1px solid var(--color-border-hairline);
+    border-top: 2px solid var(--color-gold-rule);
+    background: var(--color-surface);
+    padding: 1.75rem;
+    margin: 3rem 0;
+    max-width: 34rem;
+  }
+  .upit--kompaktno { margin: 1.5rem 0; }
+  .upit__naslov { font-size: var(--step-1); margin-bottom: 1rem; }
+  .upit__kanali { display: flex; gap: 0.75rem; flex-wrap: wrap; }
+  .privola { display: flex; gap: 0.6rem; align-items: flex-start; font-weight: 400; }
+  .privola input { width: auto; flex: none; margin-top: 0.25rem; }
+  /* Honeypot mora biti nedostupan i oku i tipkovnici, ali ne display:none —
+     dio botova preskače skrivena polja. */
+  .med {
+    position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden;
+  }
+</style>

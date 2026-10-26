@@ -1,0 +1,22 @@
+node_modules/
+dist/
+.astro/
+
+# Arhiva Ateliera: ovdje završavaju "obrisani" radovi i njihove fotografije.
+# Ne ide u git jer sadrži pune fotografije, ali se NE BRIŠE s diska.
+atelier/arhiva/
+atelier/.cache/
+
+*.log
+.DS_Store
+Thumbs.db
+*.tmp-*
+
+# Local captures, generated output and credentials.
+.snimke/
+.tmp-*/
+.netlify/
+.env
+.env.*
+!.env.example
+public/admin/

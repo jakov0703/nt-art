@@ -1,0 +1,100 @@
+---
+/**
+ * Dostupni radovi.
+ *
+ * NIJE zasebna kolekcija — filtriran pogled na istu. Kad se rad proda,
+ * mijenja se jedno polje i on ispada odavde, a njegov URL ostaje živ.
+ *
+ * Stranica ostaje HTTP 200 I INDEKSIRANA i kad nema nijednog dostupnog rada:
+ * tada mreža ustupa mjesto pozivu na narudžbu. Gašenje stranice pri praznom
+ * stanju znači da se pozicija gradi ispočetka svaki put kad se sve rasproda.
+ */
+import { getCollection } from 'astro:content';
+import Osnovni from '../../layouts/Osnovni.astro';
+import KarticaRada from '../../components/KarticaRada.astro';
+import Mrvice from '../../components/Mrvice.astro';
+import Upit from '../../components/Upit.astro';
+import { apsolutno } from '../../site.config.mjs';
+import {
+  sortiraj, jeObjavljen, jeDostupan, jsonLdMrvice, putanjaRada, naslovRada,
+} from '../../core/rad.mjs';
+
+const dostupni = sortiraj((await getCollection('radovi')).filter(jeObjavljen).filter(jeDostupan));
+
+const mrvice = [
+  { naziv: 'Početna', putanja: '/' },
+  { naziv: 'Dostupni radovi', putanja: '/dostupni-radovi/' },
+];
+
+const jsonLd = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'CollectionPage',
+    name: 'Dostupni radovi',
+    url: apsolutno('/dostupni-radovi/'),
+    mainEntity: {
+      '@type': 'ItemList',
+      numberOfItems: dostupni.length,
+      itemListElement: dostupni.map((r, i) => ({
+        '@type': 'ListItem',
+        position: i + 1,
+        url: apsolutno(putanjaRada(r, 'hr')),
+        name: naslovRada(r, 'hr'),
+      })),
+    },
+  },
+  jsonLdMrvice(mrvice),
+];
+---
+
+<Osnovni
+  naslov="Dostupni radovi — sakralne slike na prodaju"
+  opis="Trenutno dostupni originali sa sakralnim motivima. Uz svaki rad tehnika, dimenzije i cijena. Svaka slika je unikat, ručno slikana."
+  jezik="hr"
+  prijevodi={{ hr: '/dostupni-radovi/', en: '/en/available/' }}
+  jsonLd={jsonLd}
+>
+  <Mrvice stavke={mrvice} />
+
+  <div class="omot">
+    <p class="nadnaslov">Na prodaju</p>
+    <h1>Dostupni radovi</h1>
+    <p class="uvod">
+      Svaki rad ovdje je original — jedan jedini komad, ručno slikan, potpisan.
+      Nema reprodukcija ni printova u ovom popisu. Uz svaki rad stoji tehnika,
+      točne dimenzije i cijena; ako je cijena „na upit", javite se i dogovorit
+      ćemo se izravno. Rad se šalje dobro zapakiran, a prije slanja dobivate
+      fotografiju zapakiranog paketa.
+    </p>
+    <hr class="crta-zlatna" />
+
+    {dostupni.length === 0 ? (
+      /* Prazno stanje nije greška — to je poziv na narudžbu. */
+      <div class="prazno stog">
+        <h2>Trenutno nema slobodnih radova</h2>
+        <p>
+          Svi dovršeni radovi su trenutno u privatnim zbirkama. To se mijenja —
+          novi radovi nastaju stalno.
+        </p>
+        <p>
+          Ako imate na umu određeni motiv, svetca zaštitnika ili format,
+          <a href="/narudzbe/">rad se može naručiti</a>. Također možete pogledati
+          <a href="/radovi/">sve dosadašnje radove</a> da vidite kako izgledaju
+          uživo.
+        </p>
+      </div>
+    ) : (
+      <ul class="mreza">
+        {dostupni.map((r, i) => (
+          <KarticaRada rad={r} jezik="hr" prioritet={i < 2} prikaziCijenu />
+        ))}
+      </ul>
+    )}
+
+    <Upit jezik="hr" />
+  </div>
+</Osnovni>
+
+<style>
+  .uvod { max-width: var(--mjera); color: var(--color-text-2); }
+</style>

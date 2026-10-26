@@ -1,0 +1,69 @@
+---
+/**
+ * Stranica djela — hrvatski.
+ *
+ * JEDAN TRAJNI URL U SVIM STANJIMA. Kad se djelo proda, mijenja se samo
+ * `status`: stranica ostaje HTTP 200, ostaje u sitemapu, kanonizira se sama
+ * na sebe, a blok s cijenom i poziv na akciju se zamijene. Brisanje ili
+ * preusmjeravanje prodanog djela baca svu vrijednost koju je ta adresa
+ * skupila — a upravo prodane stranice s vremenom skupe najviše poveznica.
+ */
+import { getCollection } from 'astro:content';
+import { getImage } from 'astro:assets';
+
+import Osnovni from '../../layouts/Osnovni.astro';
+import DetaljRada from '../../components/DetaljRada.astro';
+import { apsolutno } from '../../site.config.mjs';
+import {
+  jeObjavljen, glavnaSlika, altTekst, titleTag, metaOpis,
+  putanjaRada, imaEngleski, jsonLdRada, jsonLdMrvice, mrviceRada,
+} from '../../core/rad.mjs';
+
+export async function getStaticPaths() {
+  const svi = await getCollection('radovi');
+  // Skice namjerno ne dobivaju URL — poluispisana stranica u indeksu je šteta.
+  return svi.filter(jeObjavljen).map((rad) => ({
+    params: { slug: rad.data.slug },
+    props: { rad },
+  }));
+}
+
+const { rad } = Astro.props;
+const glavna = glavnaSlika(rad);
+const opisTijelo = rad.body ?? '';
+
+// og:image MORA biti apsolutan — relativan Facebook i X tiho ignoriraju.
+const ogImg = await getImage({
+  src: glavna.datoteka, width: 1200, format: 'jpeg', quality: 82, fit: 'contain',
+});
+
+const putanja = putanjaRada(rad, 'hr');
+// hreflang na engleski se emitira SAMO ako engleska stranica stvarno nastaje.
+// Veza na 404 je gora od nepostojanja veze.
+const prijevodi = imaEngleski(rad)
+  ? { hr: putanja, en: putanjaRada(rad, 'en') }
+  : { hr: putanja };
+
+const jsonLd = [
+  jsonLdRada(rad, {
+    url: apsolutno(putanja),
+    slikaUrl: apsolutno(ogImg.src),
+    jezik: 'hr',
+    opis: metaOpis(rad, opisTijelo, 'hr'),
+  }),
+  jsonLdMrvice(mrviceRada(rad, 'hr')),
+];
+---
+
+<Osnovni
+  naslov={titleTag(rad, 'hr')}
+  opis={metaOpis(rad, opisTijelo, 'hr')}
+  jezik="hr"
+  prijevodi={prijevodi}
+  ogSlika={apsolutno(`/social/${rad.data.slug}-og.jpg`)}
+  ogSlikaAlt={altTekst(rad, glavna, 'hr')}
+  ogTip="article"
+  jsonLd={jsonLd}
+>
+  <DetaljRada rad={rad} jezik="hr" />
+</Osnovni>

@@ -1,0 +1,95 @@
+---
+/**
+ * Kupnja i dostava — njezini stvarni uvjeti iz upitnika.
+ *
+ * Nije registrirana za djelatnost, pa se namjerno NE piše „uvjeti poslovanja",
+ * ne spominje se tvrtka, ne emitira se Organization u strukturiranim podacima
+ * i ne obećava se zakonsko pravo na povrat koje vrijedi za trgovce. Prodaja
+ * je privatni dogovor i tako je i opisana.
+ */
+import Osnovni from '../../layouts/Osnovni.astro';
+import Mrvice from '../../components/Mrvice.astro';
+import { dostava } from '../../site.config.mjs';
+import { jsonLdMrvice } from '../../core/rad.mjs';
+
+const mrvice = [
+  { naziv: 'Početna', putanja: '/' },
+  { naziv: 'Kupnja i dostava', putanja: '/kupnja-i-dostava/' },
+];
+---
+
+<Osnovni
+  naslov="Kupnja, plaćanje i dostava"
+  opis="Kako kupiti sliku: upit, dogovor, plaćanje uplatom na račun ili gotovinom. Dostava unutar Hrvatske i osobno preuzimanje u Zagrebu."
+  jezik="hr"
+  jsonLd={[jsonLdMrvice(mrvice)]}
+>
+  <Mrvice stavke={mrvice} />
+
+  <div class="omot omot--usko">
+    <p class="nadnaslov">Kupnja</p>
+    <h1>Kupnja, plaćanje i dostava</h1>
+
+    <p class="uvod">
+      Na ovoj stranici nema košarice ni online plaćanja. Svaka slika je original
+      kojeg ima samo jedan, pa svaka kupnja počinje razgovorom.
+    </p>
+
+    <h2>Kako ide kupnja</h2>
+    <ol class="koraci">
+      <li>Pošaljete upit sa stranice slike ili preko <a href="/kontakt/">kontakta</a>.</li>
+      <li>Dogovorimo cijenu, način preuzimanja i rok.</li>
+      <li>Slika se rezervira na vaše ime i više se ne nudi drugima.</li>
+      <li>Plaćanje i preuzimanje.</li>
+    </ol>
+
+    <h2>Plaćanje</h2>
+    <p>Plaća se tek kad je slika gotova i kad ste je vidjeli. Moguće je:</p>
+    <ul>
+      {dostava.placanje.map((p) => <li>{p}</li>)}
+    </ul>
+    <p class="sitno">
+      Predujam se ne traži ni kod narudžbi.
+    </p>
+
+    <h2>Dostava i preuzimanje</h2>
+    <p>
+      Slike šaljem unutar <strong>Hrvatske</strong>. U Zagrebu i okolici moguće
+      je osobno preuzimanje po dogovoru — tako sliku možete vidjeti uživo prije
+      nego što se odlučite, što je kod slike uvijek bolje.
+    </p>
+    <p>
+      Trošak i način slanja dogovaramo prema veličini slike, jer veći formati
+      traže posebno pakiranje.
+    </p>
+
+    <h2>Okvir</h2>
+    <p>
+      Slike se prodaju <strong>neuokvirene</strong>. Platno je napeto na drveni
+      podokvir i bočno oslikano, pa slika može visjeti i bez okvira — a ako ga
+      poželite, birate ga sami prema svom prostoru.
+    </p>
+
+    <h2>Pakiranje</h2>
+    <p>
+      Slike se pakiraju sa zaštićenim kutovima i licem odvojenim od ambalaže, u
+      kruti karton.
+    </p>
+
+    <h2>Prije nego se odlučite</h2>
+    <p>
+      Pitajte sve što vas zanima — boje na ekranu nikad nisu potpuno jednake
+      onima uživo, pa vam mogu poslati dodatne fotografije slike pri dnevnom
+      svjetlu ili snimku iz više kutova.
+    </p>
+  </div>
+</Osnovni>
+
+<style>
+  .uvod { font-size: var(--step-1); color: var(--color-text-2); }
+  h2 { margin-top: 2.5rem; }
+  .koraci { padding-left: 1.2rem; }
+  .koraci li { margin-bottom: 0.6rem; max-width: var(--mjera); }
+  ul { max-width: var(--mjera); }
+  li { margin-bottom: 0.3rem; }
+</style>

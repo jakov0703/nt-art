@@ -1,0 +1,142 @@
+---
+import { site, jezici } from '../site.config.mjs';
+import { liturgijskoVrijeme } from '../core/liturgija.mjs';
+
+interface Props {
+  jezik?: 'hr' | 'en';
+  prijevodi?: Partial<Record<'hr' | 'en', string>>;
+}
+const { jezik = 'hr', prijevodi } = Astro.props;
+
+// Liturgijska boja zaglavlja. Naziv vremena je UVIJEK ispisan riječima:
+// ljubičasta i plava su pod deuteranopijom ista boja, pa sama boja nikome
+// tko ih ne razlikuje ne govori ništa.
+// Vrijednost se računa pri buildu — osvježi se sljedećim objavljivanjem rada.
+const vrijeme = site.liturgijske_boje ? liturgijskoVrijeme() : null;
+const nazivVremena = vrijeme && (jezik === 'hr' ? vrijeme.naziv : vrijeme.naziv_en);
+
+const IZBORNIK = {
+  hr: [
+    { putanja: '/dostupni-radovi/', naziv: 'Dostupni radovi' },
+    { putanja: '/radovi/', naziv: 'Svi radovi' },
+    { putanja: '/narudzbe/', naziv: 'Narudžbe' },
+    { putanja: '/o-meni/', naziv: 'O meni' },
+    { putanja: '/kontakt/', naziv: 'Kontakt' },
+  ],
+  en: [
+    { putanja: '/en/available/', naziv: 'Available' },
+    { putanja: '/en/works/', naziv: 'Works' },
+    { putanja: '/en/commissions/', naziv: 'Commissions' },
+    { putanja: '/en/about/', naziv: 'About' },
+    { putanja: '/en/contact/', naziv: 'Contact' },
+  ],
+};
+
+const stavke = IZBORNIK[jezik];
+const sada = Astro.url.pathname;
+const pocetna = jezik === 'hr' ? '/' : '/en/';
+
+// Prebacivač jezika se pokazuje SAMO kad prijevod stvarno postoji.
+// Link na stranicu koja ne postoji je gori od nepostojanja prebacivača.
+const drugiJezik = jezik === 'hr' ? 'en' : 'hr';
+const drugiURL = prijevodi?.[drugiJezik];
+---
+
+<header
+  class="zaglavlje"
+  style={vrijeme ? `--liturgijska: var(${vrijeme.boja})` : undefined}
+>
+  <div class="omot zaglavlje__red">
+    {/* Monogram NT — isti kojim se potpisuje na platnu. Puno ime se
+        namjerno ne prikazuje u zaglavlju: marka je kraća i pamtljivija,
+        a ime ostaje tamo gdje pripada — uz autorstvo radova. */}
+    <a class="marka" href={pocetna} aria-label={`${site.marka.rijec} — početna`}>
+      <span class="marka__monogram" aria-hidden="true">{site.marka.monogram}</span>
+      <span class="marka__rijec">{site.marka.rijec}</span>
+    </a>
+
+    <nav aria-label={jezik === 'hr' ? 'Glavni izbornik' : 'Main menu'}>
+      <ul class="izbornik">
+        {stavke.map((s) => (
+          <li>
+            <a
+              href={s.putanja}
+              aria-current={sada === s.putanja ? 'page' : undefined}
+            >{s.naziv}</a>
+          </li>
+        ))}
+      </ul>
+    </nav>
+
+    {drugiURL && (
+      <a class="jezik-prebaci" href={drugiURL} lang={drugiJezik} hreflang={drugiJezik}>
+        {jezici.nazivi[drugiJezik]}
+      </a>
+    )}
+
+    {nazivVremena && <span class="vrijeme">{nazivVremena}</span>}
+  </div>
+</header>
+
+<style>
+  /* Liturgijska crta ide na dno zaglavlja. Bez boje (kad su liturgijske
+     boje isključene) pada natrag na običnu tanku liniju. */
+  .zaglavlje { border-bottom: 2px solid var(--liturgijska, var(--color-border-hairline)); }
+
+  /* --- marka --------------------------------------------------- */
+  .marka {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.6rem;
+    text-decoration: none;
+    color: var(--color-text);
+    margin-right: auto;
+  }
+  .marka__monogram {
+    font-family: var(--font-display);
+    font-size: 1.65rem;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    line-height: 1;
+    color: var(--color-text);
+    border: 1.5px solid var(--color-gold-rule);
+    padding: 0.34em 0.5em 0.28em;
+    border-radius: 1px;
+    transition: background var(--prijelaz), color var(--prijelaz);
+  }
+  .marka:hover .marka__monogram {
+    background: var(--color-ink);
+    border-color: var(--color-ink);
+    color: var(--color-gold-on-ink);
+  }
+  .marka__rijec {
+    font-family: var(--font-text);
+    font-size: var(--step-0);
+    letter-spacing: 0.02em;
+    color: var(--color-text-2);
+  }
+  @media (max-width: 30rem) {
+    .marka__rijec { display: none; }
+  }
+
+  .vrijeme {
+    flex-basis: 100%;
+    font-size: var(--step--1);
+    color: var(--color-muted);
+    font-variant-caps: small-caps;
+    letter-spacing: 0.06em;
+  }
+  @media (min-width: 48rem) {
+    .vrijeme { flex-basis: auto; order: -1; width: 100%; }
+  }
+
+  .jezik-prebaci {
+    font-size: var(--step--1);
+    color: var(--color-muted);
+    text-decoration: none;
+    border: 1px solid var(--color-border);
+    padding: 0.25rem 0.6rem;
+    border-radius: var(--radius);
+  }
+  .jezik-prebaci:hover { color: var(--color-gold); border-color: var(--color-gold-rule); }
+</style>

@@ -1,0 +1,47 @@
+---
+/**
+ * Vidljiva oznaka za sadržaj koji čeka njezin odgovor.
+ *
+ * Namjerno je GLASNA. Placeholder koji izgleda kao normalan tekst završi u
+ * produkciji — a ovdje je riječ o cijenama, rokovima i biografiji, gdje
+ * izmišljen podatak nije samo neuredan nego netočan o stvarnoj osobi.
+ *
+ * `npm run provjeri` broji ove oznake i odbija reći da je stranica spremna
+ * dok ih ima.
+ */
+interface Props {
+  /** Kratak naziv onoga što nedostaje. */
+  sto: string;
+  /** Zašto je potrebno / kako odgovoriti. */
+  zasto?: string;
+}
+const { sto, zasto } = Astro.props;
+---
+
+<div class="popuni" data-popuni>
+  <p class="popuni__naslov">
+    <span aria-hidden="true">✎</span> Treba popuniti: {sto}
+  </p>
+  {zasto && <p class="popuni__zasto">{zasto}</p>}
+  <div class="popuni__sadrzaj"><slot /></div>
+</div>
+
+<style>
+  .popuni {
+    border: 2px dashed var(--color-oxblood);
+    background: var(--color-surface-sunk);
+    padding: 1rem 1.25rem;
+    margin: 1.5rem 0;
+    max-width: var(--mjera);
+  }
+  .popuni__naslov {
+    font-weight: 700;
+    color: var(--color-oxblood);
+    font-size: var(--step--1);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    margin: 0 0 0.35rem;
+  }
+  .popuni__zasto { font-size: var(--step--1); color: var(--color-muted); margin: 0 0 0.75rem; }
+  .popuni__sadrzaj > :global(*:last-child) { margin-bottom: 0; }
+</style>

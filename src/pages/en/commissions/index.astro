@@ -1,0 +1,140 @@
+---
+/**
+ * Commissions — English.
+ *
+ * Every term here matches the Croatian page and the artist's own answers:
+ * no deposit, no work from photographs, no portraits, Croatia-only shipping,
+ * unframed, acrylic on canvas. An English page promising something the
+ * Croatian one does not is worse than no English page at all.
+ */
+import Osnovni from '../../../layouts/Osnovni.astro';
+import Mrvice from '../../../components/Mrvice.astro';
+import Upit from '../../../components/Upit.astro';
+import { apsolutno, cjenik } from '../../../site.config.mjs';
+import { jsonLdMrvice } from '../../../core/rad.mjs';
+
+const mrvice = [
+  { naziv: 'Home', putanja: '/en/' },
+  { naziv: 'Commissions', putanja: '/en/commissions/' },
+];
+
+const PITANJA = [
+  {
+    p: 'How long does a commission take?',
+    o: 'Anywhere from a week to a few months, depending on the size and the subject. For date-bound gifts — confirmation, a wedding, a name day — please allow several months.',
+  },
+  {
+    p: 'Is a deposit required?',
+    o: 'No. Payment is due only once the painting is finished, by bank transfer or in cash on collection.',
+  },
+  {
+    p: 'Which subjects do you paint?',
+    o: 'Western devotional subjects — the Sacred Heart, the Divine Mercy, the Virgin Mary, saints. I also paint flowers, birds and free compositions.',
+  },
+  {
+    p: 'Do you paint portraits or work from a photograph?',
+    o: 'No. I paint sacred subjects and free compositions, but I do not make portraits or paintings based on a supplied photograph.',
+  },
+  {
+    p: 'Do the paintings come framed?',
+    o: 'No. The canvas is stretched over a wooden frame and painted around the edges, so it can hang unframed. If you want a frame, you choose one to suit your space.',
+  },
+  {
+    p: 'Do you ship outside Croatia?',
+    o: 'Not at the moment — shipping is within Croatia only. Collection in person is possible in and around Zagreb.',
+  },
+];
+
+const jsonLd = [
+  jsonLdMrvice(mrvice),
+  {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    '@id': `${apsolutno('/en/commissions/')}#faq`,
+    inLanguage: 'en',
+    mainEntity: PITANJA.map((x) => ({
+      '@type': 'Question', name: x.p,
+      acceptedAnswer: { '@type': 'Answer', text: x.o },
+    })),
+  },
+];
+---
+
+<Osnovni
+  naslov="Commission a sacred painting — Zagreb, Croatia"
+  opis="Commission a hand-painted sacred work: the Sacred Heart, the Virgin Mary or a saint. Acrylic on canvas, from a week to a few months. Prices from €50."
+  jezik="en"
+  prijevodi={{ hr: '/narudzbe/', en: '/en/commissions/' }}
+  jsonLd={jsonLd}
+>
+  <Mrvice stavke={mrvice} jezik="en" />
+
+  <div class="omot omot--usko">
+    <p class="nadnaslov">Commissions</p>
+    <h1>Commission a painting</h1>
+
+    <p class="uvod">
+      Most people get in touch not about a painting they have seen, but about
+      one that does not exist yet: the Sacred Heart for a living room, a
+      painting for a prayer corner, a gift for a confirmation or a wedding.
+    </p>
+
+    <hr class="crta-zlatna" />
+
+    <h2>How it works</h2>
+    <ol class="koraci">
+      <li><strong>Get in touch.</strong> Tell me the subject, who it is for and where it will hang.</li>
+      <li><strong>We agree.</strong> Subject, size, timing and price.</li>
+      <li><strong>Painting.</strong> From a week to a few months. Changes are possible by arrangement.</li>
+      <li><strong>Collection and payment.</strong> In person in Zagreb or posted within Croatia. Payment is due only when the work is finished.</li>
+    </ol>
+
+    <h2>Price</h2>
+    <table class="cjenik brojke">
+      <thead>
+        <tr><th scope="col">Size</th><th scope="col">Price</th></tr>
+      </thead>
+      <tbody>
+        {cjenik.map((c) => (
+          <tr><th scope="row">{c.format}</th><td>{c.od} – {c.do} €</td></tr>
+        ))}
+      </tbody>
+    </table>
+    <p class="sitno">
+      Final price depends on the subject and its complexity. Paintings are sold
+      unframed, on canvas stretched over a wooden frame. No deposit is required.
+    </p>
+
+    <h2>What I do not do</h2>
+    <p>
+      So as not to waste your time: I do not paint portraits or work from
+      supplied photographs, and I do not currently take commissions for churches,
+      chapels or altarpieces.
+    </p>
+
+    <h2>Questions</h2>
+    <dl class="faq">
+      {PITANJA.map((x) => (
+        <div class="faq__stavka"><dt>{x.p}</dt><dd>{x.o}</dd></div>
+      ))}
+    </dl>
+
+    <Upit jezik="en" />
+  </div>
+</Osnovni>
+
+<style>
+  .uvod { font-size: var(--step-1); color: var(--color-text-2); }
+  h2 { margin-top: 2.5rem; }
+  .koraci { padding-left: 1.2rem; }
+  .koraci li { margin-bottom: 0.9rem; max-width: var(--mjera); }
+  .cjenik { border-collapse: collapse; margin: 1rem 0; width: 100%; max-width: 26rem; }
+  .cjenik th, .cjenik td { text-align: left; padding: 0.55rem 0;
+    border-bottom: 1px solid var(--color-border-hairline); }
+  .cjenik thead th { font-size: var(--step--1); color: var(--color-muted);
+    text-transform: uppercase; letter-spacing: 0.05em; }
+  .cjenik tbody th { font-weight: 400; }
+  .faq__stavka { border-bottom: 1px solid var(--color-border-hairline); padding: 1rem 0; }
+  .faq dt { font-family: var(--font-display); font-size: var(--step-1); margin-bottom: 0.4rem; }
+  .faq dd { margin: 0; max-width: var(--mjera); color: var(--color-text-2); }
+</style>

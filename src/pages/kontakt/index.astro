@@ -1,0 +1,64 @@
+---
+import Osnovni from '../../layouts/Osnovni.astro';
+import Mrvice from '../../components/Mrvice.astro';
+import Upit from '../../components/Upit.astro';
+import { site } from '../../site.config.mjs';
+import { jsonLdMrvice } from '../../core/rad.mjs';
+
+const mrvice = [
+  { naziv: 'Početna', putanja: '/' },
+  { naziv: 'Kontakt', putanja: '/kontakt/' },
+];
+---
+
+<Osnovni
+  naslov={`Kontakt — ${site.naziv}`}
+  opis="Kontakt za upit o dostupnom radu ili narudžbu sakralne slike."
+  jezik="hr"
+  prijevodi={{ hr: '/kontakt/', en: '/en/contact/' }}
+  jsonLd={[jsonLdMrvice(mrvice)]}
+>
+  <Mrvice stavke={mrvice} />
+
+  <div class="omot omot--usko">
+    <p class="nadnaslov">Javite se</p>
+    <h1>Kontakt</h1>
+
+    <p class="uvod">
+      Za upit o konkretnom radu najbrže je javiti se s njegove stranice — poruka
+      tada već sadrži o kojem je radu riječ. Za sve ostalo, ovdje.
+    </p>
+
+    <p>
+      Nema glupog pitanja. Ako ne znate što točno želite, opišite priliku i za
+      koga je — to je obično dovoljno za početak razgovora.
+    </p>
+
+    <Upit jezik="hr" />
+
+    <h2>Što je korisno napisati</h2>
+    <ul>
+      <li>za koga je i povodom čega (krštenje, krizma, imendan, dar, vlastiti dom)</li>
+      <li>motiv ako ga imate na umu — svetac, Gospa, ikona, nešto viđeno</li>
+      <li>otprilike koja veličina, ili koliki je zid</li>
+      <li>ima li datum do kojeg treba biti gotovo</li>
+    </ul>
+
+    {!site.email && (
+      <p class="poruka poruka--greska">
+        <span class="poruka__ikona" aria-hidden="true">!</span>
+        <span>
+          Kontakt e-mail još nije upisan u <code>src/site.config.mjs</code>.
+          Bez njega obrazac nema kamo poslati poruku.
+        </span>
+      </p>
+    )}
+  </div>
+</Osnovni>
+
+<style>
+  .uvod { font-size: var(--step-1); color: var(--color-text-2); }
+  h2 { margin-top: 2.5rem; }
+  ul { max-width: var(--mjera); }
+  li { margin-bottom: 0.4rem; }
+</style>
