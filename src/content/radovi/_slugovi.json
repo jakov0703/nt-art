@@ -34,5 +34,21 @@
     "id": "r-2026-003",
     "stanje": "povucen",
     "od": "2026-09-27"
+  },
+  {
+    "slug": "bozuri-u-vazi",
+    "id": "r-2026-001",
+    "stanje": "aktivan"
+  },
+  {
+    "slug": "laste-u-letu",
+    "id": "r-2026-002",
+    "stanje": "aktivan"
+  },
+  {
+    "slug": "provjera-spremanja-1793126401511",
+    "id": "r-2026-006",
+    "stanje": "aktivan",
+    "od": "2026-10-27"
   }
 ]
